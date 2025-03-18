@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavGraph(navController) // Aquí se inicia la navegación con Splash
+                    NavGraph(navController)
                 }
             }
         }
