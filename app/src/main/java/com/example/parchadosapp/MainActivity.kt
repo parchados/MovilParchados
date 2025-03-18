@@ -11,7 +11,6 @@ import com.example.parchadosapp.navigation.NavGraph
 import com.example.parchadosapp.ui.theme.ParchadosAppTheme
 import androidx.compose.ui.Modifier
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,10 +21,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavGraph(navController)
+                    NavGraph(navController, this)
                 }
             }
         }
     }
 }
-
