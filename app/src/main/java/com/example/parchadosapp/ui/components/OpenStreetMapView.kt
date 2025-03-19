@@ -12,9 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.example.parchadosapp.R
 import com.google.android.gms.location.*
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.osmdroid.config.Configuration
@@ -28,11 +30,13 @@ import kotlin.coroutines.resumeWithException
 @Composable
 fun OpenStreetMapView(context: Context) {
     var userLocation by remember { mutableStateOf<GeoPoint?>(null) }
-    var locationLoaded by remember { mutableStateOf(false) }
     val localContext = LocalContext.current
 
     // Ubicación de respaldo (Pontificia Universidad Javeriana)
     val fallbackLocation = GeoPoint(4.627457, -74.064533)
+
+    // 🔹 Ubicación corregida del Club de Ping Pong La Decanatura
+    val pingPongLocation = GeoPoint(4.631812, -74.066665)
 
     // Verificar si los permisos están concedidos
     val hasLocationPermission = ContextCompat.checkSelfPermission(
@@ -41,10 +45,9 @@ fun OpenStreetMapView(context: Context) {
 
     LaunchedEffect(hasLocationPermission) {
         if (hasLocationPermission) {
-            userLocation = getUserLocation(context) ?: fallbackLocation // Usa Javeriana si falla
-            locationLoaded = true
+            userLocation = getUserLocation(context) ?: fallbackLocation
         } else {
-            userLocation = fallbackLocation // Si no hay permisos, usa la Javeriana
+            userLocation = fallbackLocation
         }
     }
 
@@ -65,16 +68,30 @@ fun OpenStreetMapView(context: Context) {
                     setMultiTouchControls(true)
 
                     val mapController = controller
-
                     val startPoint = userLocation ?: fallbackLocation
-                    mapController.setZoom(18.0) // 🔹 Zoom más alto para mayor detalle
+                    mapController.setZoom(18.0)
                     mapController.setCenter(startPoint)
 
-                    val marker = Marker(this)
-                    marker.position = startPoint
-                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    marker.title = if (userLocation == fallbackLocation) "Ubicación no encontrada - Javeriana" else "Tu ubicación"
-                    overlays.add(marker)
+                    // 🔹 Marcador de ubicación del usuario
+                    val userMarker = Marker(this).apply {
+                        position = startPoint
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        title = "Tu ubicación"
+                    }
+                    overlays.add(userMarker)
+
+                    // 🔹 Marcador personalizado del Club de Ping Pong (más pequeño)
+                    val pingPongMarker = Marker(this).apply {
+                        position = pingPongLocation
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                        title = "Club de Ping Pong La Decanatura"
+
+                        // Asigna el ícono personalizado desde drawable y lo escala más pequeño
+                        val drawable = ContextCompat.getDrawable(context, R.drawable.pingpong)
+                        icon = drawable
+                        icon.setBounds(0, 0, 50, 50) // 🔹 Tamaño reducido del marcador
+                    }
+                    overlays.add(pingPongMarker)
                 }
             },
             modifier = Modifier.fillMaxSize()
