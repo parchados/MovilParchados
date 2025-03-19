@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,15 +27,15 @@ fun HomeScreen(navController: NavController, context: Context) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF8F5F0)), // Fondo beige
-        contentAlignment = Alignment.TopCenter // 🔹 Centrar en la parte superior
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp), // 🔹 Espaciado general
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 🔹 Sección superior centrada
+            // 🔹 Sección superior (Perfil + Título + Notificaciones)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -51,21 +52,21 @@ fun HomeScreen(navController: NavController, context: Context) {
                         .clip(CircleShape)
                 )
 
-                Spacer(modifier = Modifier.width(16.dp)) // 🔹 Más separación del título
+                Spacer(modifier = Modifier.width(16.dp))
 
-                // 🔹 Título centrado con padding extra
+                // 🔹 Título principal
                 Text(
                     text = "Parchados",
                     fontSize = 42.sp,
                     fontFamily = BrightRetro,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF003F5C),
-                    modifier = Modifier.padding(horizontal = 24.dp) // 🔹 Espacio extra a los lados
+                    modifier = Modifier.padding(horizontal = 24.dp)
                 )
 
-                Spacer(modifier = Modifier.width(16.dp)) // 🔹 Más separación del título
+                Spacer(modifier = Modifier.width(16.dp))
 
-                // 🔹 Icono de notificaciones
+                // 🔹 Icono de notificaciones con insignia roja
                 Box(
                     modifier = Modifier.size(55.dp),
                     contentAlignment = Alignment.Center
@@ -78,7 +79,6 @@ fun HomeScreen(navController: NavController, context: Context) {
                             modifier = Modifier.size(40.dp)
                         )
                     }
-                    // 🔹 Insignia roja de notificaciones
                     Box(
                         modifier = Modifier
                             .size(12.dp)
@@ -87,11 +87,66 @@ fun HomeScreen(navController: NavController, context: Context) {
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // 🔹 Sección "Tus Parches"
+            Text(
+                text = "Tus Parches",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF003F5C),
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // 🔹 Tarjeta del parche en el Club de Ping Pong
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 🔹 Imagen de referencia del Club
+                    Image(
+                        painter = painterResource(id = R.drawable.pingpong),
+                        contentDescription = "Ping Pong",
+                        modifier = Modifier
+                            .size(60.dp)
+                            .clip(CircleShape)
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    // 🔹 Detalles del parche
+                    Column {
+                        Text(
+                            text = "Club de Ping Pong La Decanatura",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF003F5C)
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "🕒 6:00 PM - 8:00 PM",
+                            fontSize = 14.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            }
         }
 
-        // 🔹 Navbar separado en la parte inferior
+        // 🔹 Navbar en la parte inferior
         BottomNavigationBar(navController, Modifier.align(Alignment.BottomCenter))
     }
 }
-
-
