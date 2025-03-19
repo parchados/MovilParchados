@@ -10,6 +10,7 @@ import com.example.parchadosapp.ui.screens.LoginScreen
 import com.example.parchadosapp.ui.screens.RegisterScreen
 import com.example.parchadosapp.ui.screens.SplashScreen
 import com.example.parchadosapp.ui.screens.MapScreen // 🔹 Se importa la nueva pantalla
+import com.example.parchadosapp.ui.screens.ParcheScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, context: Context) {
@@ -17,7 +18,8 @@ fun NavGraph(navController: NavHostController, context: Context) {
         composable("splash") { SplashScreen(navController) }
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
-        composable("home") { HomeScreen(navController, context) } // 🔹 Se pasa 'context'
-        composable("map") { MapScreen(navController, context) }  // 🔹 Nueva pantalla para MapScreen
+        composable("home") { HomeScreen(navController, context) }
+        composable("map") { MapScreen(navController, context) }
+        composable("parche") { ParcheScreen(navController, context) }
     }
 }

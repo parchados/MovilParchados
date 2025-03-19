@@ -96,7 +96,16 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
             contentAlignment = Alignment.Center
         ) {
             FloatingActionButton(
-                onClick = { /* Acción al presionar P */ },
+                onClick = {
+                    if (selectedItem != "parche") {
+                        selectedItem = "parche"
+                        navController.navigate("parche") {
+                            popUpTo("parche") { inclusive = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                },
                 containerColor = PrimaryColor,
                 shape = CircleShape,
                 modifier = Modifier.shadow(10.dp, CircleShape)
