@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.ui.components.BottomNavigationBar
-import com.example.parchadosapp.ui.components.OpenStreetMapView
+
 import com.example.parchadosapp.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,8 +56,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Mapa interactivo
-                OpenStreetMapView(context)
+
 
                 Spacer(modifier = Modifier.height(20.dp))
 

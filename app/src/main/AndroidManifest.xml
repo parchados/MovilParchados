@@ -23,8 +23,8 @@
             android:name="org.osmdroid"
             android:required="false" />
         <meta-data
-            android:name="org.osmdroid.config"
-            android:value="true"/>
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key"/>
 
         <activity
             android:name=".MainActivity"
