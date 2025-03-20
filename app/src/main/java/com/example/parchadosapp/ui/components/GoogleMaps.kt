@@ -36,7 +36,7 @@ fun GoogleMapView(context: Context) {
             map.clear()
             val marker = MarkerOptions()
                 .position(fixedLocation)
-                .title("Ubicación Inicial")
+                .title("Ubicación Actual")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
 
             map.addMarker(marker)
@@ -56,7 +56,7 @@ fun GoogleMapView(context: Context) {
 
                         val marker = MarkerOptions()
                             .position(fixedLocation)
-                            .title("Ubicación Inicial")
+                            .title("Ubicación Actual")
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
 
                         map.addMarker(marker)
