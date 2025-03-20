@@ -29,7 +29,7 @@ import com.example.parchadosapp.ui.theme.BrightRetro
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(navController: NavController, context: Context) {
-    var selectedFilter by remember { mutableStateOf<String?>(null) } // ✅ Ahora acepta null
+    var selectedFilters by remember { mutableStateOf<Set<String>>(emptySet()) } // ✅ Ahora es un conjunto de filtros
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) }
@@ -50,9 +50,17 @@ fun MapScreen(navController: NavController, context: Context) {
                     .background(Color.White)
                     .align(Alignment.TopCenter),
             ) {
-                FilterSection( // ✅ Ahora acepta null sin errores
-                    selectedFilter = selectedFilter,
-                    onFilterSelected = { newFilter -> selectedFilter = newFilter }
+                FilterSection(
+                    selectedFilters = selectedFilters,
+                    onFilterSelected = { filter ->
+                        selectedFilters = if (filter == null) {
+                            emptySet() // ✅ Borra todos los filtros cuando el botón de reset es presionado
+                        } else if (filter in selectedFilters) {
+                            selectedFilters - filter // ✅ Si ya estaba seleccionado, lo quita
+                        } else {
+                            selectedFilters + filter // ✅ Agrega si no estaba seleccionado
+                        }
+                    }
                 )
             }
         }
@@ -98,9 +106,9 @@ fun SearchBar(
  * 🔹 Botones de filtro con mejor diseño.
  */
 @Composable
-fun FilterSection(selectedFilter: String?, onFilterSelected: (String?) -> Unit) {
+fun FilterSection(selectedFilters: Set<String>, onFilterSelected: (String?) -> Unit) {
     var isSportsFilter by remember { mutableStateOf(false) }
-    var searchText by remember { mutableStateOf("") } // ✅ Estado de búsqueda
+    var searchText by remember { mutableStateOf("") }
 
     val normalFilters = listOf("Courts", "Games", "Tournaments", "Leagues", "Events", "Training", "Clubs")
     val sportsFilters = listOf("Soccer", "Basketball", "Tennis", "Volleyball", "Baseball", "Swimming", "Running")
@@ -111,7 +119,7 @@ fun FilterSection(selectedFilter: String?, onFilterSelected: (String?) -> Unit) 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 16.dp) // ✅ Padding para mejorar la distribución
+            .padding(top = 16.dp, bottom = 16.dp)
             .padding(horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -128,10 +136,10 @@ fun FilterSection(selectedFilter: String?, onFilterSelected: (String?) -> Unit) 
                 onSearchTextChanged = { searchText = it }
             )
 
-            // 🔹 Botón para cambiar el tipo de filtros
+            // 🔹 Botón para cambiar entre filtros normales y deportes
             IconButton(
                 onClick = { isSportsFilter = !isSportsFilter },
-                modifier = Modifier.size(45.dp)
+                modifier = Modifier.size(40.dp)
             ) {
                 Icon(
                     painter = painterResource(id = currentIcon),
@@ -141,7 +149,7 @@ fun FilterSection(selectedFilter: String?, onFilterSelected: (String?) -> Unit) 
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp)) // ✅ Espaciado entre barra de búsqueda y filtros
+        Spacer(modifier = Modifier.height(12.dp))
 
         // 🔹 Filtros en carrusel + Botón Reset alineado correctamente
         Row(
@@ -152,30 +160,34 @@ fun FilterSection(selectedFilter: String?, onFilterSelected: (String?) -> Unit) 
             // 🔹 Carrusel de filtros dentro de un Row con scroll
             Row(
                 modifier = Modifier
-                    .weight(1f) // ✅ Mantiene los filtros alineados correctamente
+                    .weight(1f)
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 currentFilters.forEach { filter ->
+                    val isSelected = filter in selectedFilters
+
                     TextButton(
                         onClick = { onFilterSelected(filter) },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = if (selectedFilter == filter) Color.White else Color(0xFF003F5C),
-                            containerColor = if (selectedFilter == filter) Color(0xFF003F5C) else Color.White
-                        ),
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .border(1.dp, Color(0xFF003F5C), RoundedCornerShape(8.dp))
+                            .background(if (isSelected) Color(0xFF003F5C) else Color.White) // ✅ Ahora cubre todo el botón
                     ) {
-                        Text(text = filter, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            text = filter,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (isSelected) Color.White else Color(0xFF003F5C) // ✅ Mantiene el contraste correcto
+                        )
                     }
                 }
             }
 
             // 🔹 Botón de Reset alineado correctamente al lado del carrusel
             IconButton(
-                onClick = { onFilterSelected(null) }, // ✅ Reinicia los filtros
-                modifier = Modifier.size(40.dp) // ✅ Ajusta el tamaño del botón si es necesario
+                onClick = { onFilterSelected(null) }, // ✅ Ahora resetea todos los filtros
+                modifier = Modifier.size(40.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.reset),
@@ -186,7 +198,7 @@ fun FilterSection(selectedFilter: String?, onFilterSelected: (String?) -> Unit) 
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp)) // ✅ Espaciado debajo de los filtros
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
