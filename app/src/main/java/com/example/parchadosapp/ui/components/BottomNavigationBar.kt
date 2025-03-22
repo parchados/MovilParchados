@@ -65,10 +65,20 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
 
             Spacer(modifier = Modifier.width(50.dp)) // Espacio para el botón flotante
 
+            // Botón para el calendario
             NavigationBarItem(
-                icon = { IconWithBackground(R.drawable.calendar, isSelected = selectedItem == "calendario") },
-                selected = selectedItem == "calendario",
-                onClick = { selectedItem = "calendario" }
+                icon = { IconWithBackground(R.drawable.calendar, isSelected = selectedItem == "calendar") },
+                selected = selectedItem == "calendar",
+                onClick = {
+                    if (selectedItem != "calendar") {
+                        selectedItem = "calendar"
+                        navController.navigate("calendar") {
+                            popUpTo("calendar") { inclusive = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
             )
 
             NavigationBarItem(
@@ -87,10 +97,10 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
             )
         }
 
-        // 🔹 Botón flotante "P" correctamente alineado y más visible
+        // Botón flotante "P"
         Box(
             modifier = Modifier
-                .offset(y = (-28).dp) // Se baja más para evitar cortes
+                .offset(y = (-28).dp)
                 .size(90.dp)
                 .zIndex(2f),
             contentAlignment = Alignment.Center
@@ -112,7 +122,7 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
             ) {
                 Text(
                     text = "P",
-                    fontSize = 40.sp, // 🔹 Aumentado
+                    fontSize = 40.sp,
                     fontFamily = BrightRetro,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -121,6 +131,7 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
         }
     }
 }
+
 
 /**
  * 🔹 Componente para los íconos con fondo y bordeado

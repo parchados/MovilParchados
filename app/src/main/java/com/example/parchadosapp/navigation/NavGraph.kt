@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.parchadosapp.ui.screens.GoogleCalendarScreen
 import com.example.parchadosapp.ui.screens.HomeScreen
 import com.example.parchadosapp.ui.screens.LoginScreen
 import com.example.parchadosapp.ui.screens.RegisterScreen
@@ -21,5 +22,6 @@ fun NavGraph(navController: NavHostController, context: Context) {
         composable("home") { HomeScreen(navController, context) }
         composable("map") { MapScreen(navController, context) }
         composable("parche") { ParcheScreen(navController, context) }
+        composable(route = "calendar") { GoogleCalendarScreen(navController) }
     }
 }
