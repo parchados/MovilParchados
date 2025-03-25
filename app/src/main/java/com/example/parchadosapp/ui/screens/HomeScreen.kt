@@ -5,6 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,13 +21,54 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.R
 import com.example.parchadosapp.ui.components.BottomNavigationBar
-import com.example.parchadosapp.ui.components.PatchList
+
 import com.example.parchadosapp.ui.components.Patch
+import com.example.parchadosapp.ui.components.PatchCard
 import com.example.parchadosapp.ui.components.SportsCarousel
 import com.example.parchadosapp.ui.theme.BrightRetro
 
 @Composable
 fun HomeScreen(navController: NavController, context: Context) {
+    // Lista de parches
+    val patches = listOf(
+        Patch(
+            image = R.drawable.campo_futbol, // Imagen del lugar
+            name = "Campo de Fútbol A",
+            address = "Calle Fútbol 123",
+            date = "Sábado, 24 de Marzo",
+            time = "3:00 PM",
+            remaining = 5,
+            sport = "Fútbol"
+        ),
+        Patch(
+            image = R.drawable.cancha_basket, // Imagen del lugar
+            name = "Cancha de Baloncesto B",
+            address = "Avenida Basket 456",
+            date = "Domingo, 25 de Marzo",
+            time = "6:00 PM",
+            remaining = 3,
+            sport = "Baloncesto"
+        ),
+        Patch(
+            image = R.drawable.billarl, // Imagen del lugar
+            name = "Sala de Billar Central",
+            address = "Calle Billar 789",
+            date = "Lunes, 26 de Marzo",
+            time = "8:00 PM",
+            remaining = 2,
+            sport = "Billar"
+        ),
+        Patch(
+            image = R.drawable.cancha_tenis, // Imagen del lugar
+            name = "Cancha de Tenis A",
+            address = "Avenida Tenis 321",
+            date = "Martes, 27 de Marzo",
+            time = "5:00 PM",
+            remaining = 4,
+            sport = "Tenis"
+        )
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -35,8 +78,7 @@ fun HomeScreen(navController: NavController, context: Context) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             // 🔹 Sección superior (Perfil + Título + Notificaciones)
             Row(
@@ -100,48 +142,28 @@ fun HomeScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // 🔹 Lista de parches disponibles
-            val patches = listOf(
-                Patch(
-                    image = R.drawable.campo_futbol, // Imagen del lugar
-                    name = "Campo de Fútbol A",
-                    address = "Calle Fútbol 123",
-                    date = "Sábado, 24 de Marzo",
-                    time = "3:00 PM",
-                    remaining = 5,
-                    sport = "Fútbol"
-                ),
-                Patch(
-                    image = R.drawable.cancha_basket, // Imagen del lugar
-                    name = "Cancha de Baloncesto B",
-                    address = "Avenida Basket 456",
-                    date = "Domingo, 25 de Marzo",
-                    time = "6:00 PM",
-                    remaining = 3,
-                    sport = "Baloncesto"
-                ),
-                Patch(
-                    image = R.drawable.billar, // Imagen del lugar
-                    name = "Sala de Billar Central",
-                    address = "Calle Billar 789",
-                    date = "Lunes, 26 de Marzo",
-                    time = "8:00 PM",
-                    remaining = 2,
-                    sport = "Billar"
-                ),
-                Patch(
-                    image = R.drawable.cancha_tenis, // Imagen del lugar
-                    name = "Cancha de Tenis A",
-                    address = "Avenida Tenis 321",
-                    date = "Martes, 27 de Marzo",
-                    time = "5:00 PM",
-                    remaining = 4,
-                    sport = "Tenis"
-                )
-            )
+            // 🔹 Lista de parches disponibles envuelta en LazyColumn
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)  // Esto hace que ocupe el espacio disponible antes del navbar
+            ) {
+                item {
+                    Text(
+                        text = "Parchando Ahora",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF003F5C),
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+                items(patches) { patch ->
+                    PatchCard(patch = patch)
+                }
+            }
 
-            // Llama al componente PatchList
-            PatchList(patches = patches)
+            // Agregar un espacio al final para evitar que el navbar lo tape
+            Spacer(modifier = Modifier.height(120.dp)) // Aumenté el espacio a 120dp
         }
 
         // 🔹 Navbar en la parte inferior

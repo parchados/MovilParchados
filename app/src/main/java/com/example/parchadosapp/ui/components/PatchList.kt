@@ -29,74 +29,61 @@ data class Patch(
 )
 
 @Composable
-fun PatchList(patches: List<Patch>) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        // Título de Parches Disponibles
-        Text(
-            text = "Parches Disponibles",
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
-            color = Color(0xFF003F5C)
-        )
-
-        patches.forEach { patch ->
-            Card(
+fun PatchCard(patch: Patch) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Imagen del lugar
+            Image(
+                painter = painterResource(id = patch.image),
+                contentDescription = "Imagen del lugar",
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(4.dp)
+                    .size(80.dp)
+                    .clip(CircleShape)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Información del parche
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
-                Row(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Imagen del lugar
-                    Image(
-                        painter = painterResource(id = patch.image),
-                        contentDescription = "Imagen del lugar",
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                    )
-
-                    Spacer(modifier = Modifier.width(16.dp))
-
-                    // Información del parche
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = patch.name,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            color = Color(0xFF003F5C)
-                        )
-                        Text(
-                            text = patch.address,
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = "${patch.date} | ${patch.time}",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                        Text(
-                            text = "Faltan ${patch.remaining} personas",
-                            fontSize = 14.sp,
-                            color = Color(0xFF003F5C)
-                        )
-                        Text(
-                            text = "Deporte: ${patch.sport}",
-                            fontSize = 14.sp,
-                            color = Color(0xFF003F5C)
-                        )
-                    }
-                }
+                Text(
+                    text = patch.name,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = Color(0xFF003F5C)
+                )
+                Text(
+                    text = patch.address,
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "${patch.date} | ${patch.time}",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "Faltan ${patch.remaining} personas",
+                    fontSize = 14.sp,
+                    color = Color(0xFF003F5C)
+                )
+                Text(
+                    text = "Deporte: ${patch.sport}",
+                    fontSize = 14.sp,
+                    color = Color(0xFF003F5C)
+                )
             }
         }
     }
