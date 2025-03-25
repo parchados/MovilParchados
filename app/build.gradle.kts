@@ -97,5 +97,6 @@ dependencies {
     implementation("com.google.apis:google-api-services-calendar:v3-rev411-1.25.0")
     implementation ("com.google.http-client:google-http-client-gson:1.34.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
 }

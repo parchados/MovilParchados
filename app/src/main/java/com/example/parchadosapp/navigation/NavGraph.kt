@@ -13,6 +13,7 @@ import com.example.parchadosapp.ui.screens.SplashScreen
 import com.example.parchadosapp.ui.screens.MapScreen
 import com.example.parchadosapp.ui.screens.ParcheScreen
 import com.example.parchadosapp.ui.screens.NotificationsScreen // ✅ Importa NotificationsScreen
+import com.example.parchadosapp.ui.screens.PerfilScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, context: Context) {
@@ -24,8 +25,9 @@ fun NavGraph(navController: NavHostController, context: Context) {
         composable("map") { MapScreen(navController, context) }
         composable("parche") { ParcheScreen(navController, context) }
         composable("calendar") { GoogleCalendarScreen(navController) }
-
-        // ✅ Agrega esta línea para que la navegación funcione
         composable("notifications") { NotificationsScreen(navController) }
+
+        // ✅ Nuevo destino para la pantalla de perfil
+        composable("perfil") { PerfilScreen(navController) }
     }
 }

@@ -3,6 +3,7 @@ package com.example.parchadosapp.ui.screens
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -49,6 +50,9 @@ fun HomeScreen(navController: NavController, context: Context) {
                     modifier = Modifier
                         .size(55.dp)
                         .clip(CircleShape)
+                        .clickable {
+                            navController.navigate("perfil")
+                        }
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
