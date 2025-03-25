@@ -56,17 +56,19 @@ fun NotificationsScreen(navController: NavController) {
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
+            val userName = "Juan" // Nombre provisional
+
             val notifications = listOf(
-                "🎉 ¡Nuevo torneo de fútbol este sábado!",
-                "📅 Has sido invitado a un partido de tenis",
-                "🕒 Recuerda tu partido de baloncesto a las 5PM",
-                "📍 Nueva ubicación disponible para jugar billar",
-                "👥 Tienes 3 nuevos parches cerca",
-                "💬 Álvaro te envió un mensaje",
-                "🚨 Cancelación de partido por clima",
-                "✅ Tu reserva ha sido confirmada",
-                "🏆 Ranking actualizado: subiste 2 posiciones",
-                "⚠️ No olvides confirmar tu asistencia al evento"
+                "🎉 ¡$userName, nuevo torneo de fútbol este sábado!",
+                "📅 $userName, has sido invitado a un partido de tenis",
+                "🕒 $userName, recuerda tu partido de baloncesto a las 5PM",
+                "📍 $userName, hay una nueva ubicación disponible para jugar billar",
+                "👥 $userName, tienes 3 nuevos parches cerca",
+                "💬 Álvaro te envió un mensaje, $userName",
+                "🚨 $userName, se canceló un partido por clima",
+                "✅ $userName, tu reserva ha sido confirmada",
+                "🏆 $userName, subiste 2 posiciones en el ranking",
+                "⚠️ $userName, no olvides confirmar tu asistencia al evento"
             )
 
             notifications.forEach { notification ->

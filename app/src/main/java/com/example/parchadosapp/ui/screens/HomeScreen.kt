@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.R
 import com.example.parchadosapp.ui.components.BottomNavigationBar
+import com.example.parchadosapp.ui.components.PatchList
+import com.example.parchadosapp.ui.components.Patch
 import com.example.parchadosapp.ui.components.SportsCarousel
 import com.example.parchadosapp.ui.theme.BrightRetro
 
@@ -97,6 +99,49 @@ fun HomeScreen(navController: NavController, context: Context) {
             SportsCarousel()
 
             Spacer(modifier = Modifier.height(40.dp))
+
+            // 🔹 Lista de parches disponibles
+            val patches = listOf(
+                Patch(
+                    image = R.drawable.campo_futbol, // Imagen del lugar
+                    name = "Campo de Fútbol A",
+                    address = "Calle Fútbol 123",
+                    date = "Sábado, 24 de Marzo",
+                    time = "3:00 PM",
+                    remaining = 5,
+                    sport = "Fútbol"
+                ),
+                Patch(
+                    image = R.drawable.cancha_basket, // Imagen del lugar
+                    name = "Cancha de Baloncesto B",
+                    address = "Avenida Basket 456",
+                    date = "Domingo, 25 de Marzo",
+                    time = "6:00 PM",
+                    remaining = 3,
+                    sport = "Baloncesto"
+                ),
+                Patch(
+                    image = R.drawable.billar, // Imagen del lugar
+                    name = "Sala de Billar Central",
+                    address = "Calle Billar 789",
+                    date = "Lunes, 26 de Marzo",
+                    time = "8:00 PM",
+                    remaining = 2,
+                    sport = "Billar"
+                ),
+                Patch(
+                    image = R.drawable.cancha_tenis, // Imagen del lugar
+                    name = "Cancha de Tenis A",
+                    address = "Avenida Tenis 321",
+                    date = "Martes, 27 de Marzo",
+                    time = "5:00 PM",
+                    remaining = 4,
+                    sport = "Tenis"
+                )
+            )
+
+            // Llama al componente PatchList
+            PatchList(patches = patches)
         }
 
         // 🔹 Navbar en la parte inferior
