@@ -10,8 +10,9 @@ import com.example.parchadosapp.ui.screens.HomeScreen
 import com.example.parchadosapp.ui.screens.LoginScreen
 import com.example.parchadosapp.ui.screens.RegisterScreen
 import com.example.parchadosapp.ui.screens.SplashScreen
-import com.example.parchadosapp.ui.screens.MapScreen // 🔹 Se importa la nueva pantalla
+import com.example.parchadosapp.ui.screens.MapScreen
 import com.example.parchadosapp.ui.screens.ParcheScreen
+import com.example.parchadosapp.ui.screens.NotificationsScreen // ✅ Importa NotificationsScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, context: Context) {
@@ -22,6 +23,9 @@ fun NavGraph(navController: NavHostController, context: Context) {
         composable("home") { HomeScreen(navController, context) }
         composable("map") { MapScreen(navController, context) }
         composable("parche") { ParcheScreen(navController, context) }
-        composable(route = "calendar") { GoogleCalendarScreen(navController) }
+        composable("calendar") { GoogleCalendarScreen(navController) }
+
+        // ✅ Agrega esta línea para que la navegación funcione
+        composable("notifications") { NotificationsScreen(navController) }
     }
 }

@@ -68,7 +68,9 @@ fun HomeScreen(navController: NavController, context: Context) {
                     modifier = Modifier.size(55.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    IconButton(onClick = { /* Acción de notificaciones */ }) {
+                    IconButton(onClick = {
+                        navController.navigate("notifications")
+                    }) {
                         Icon(
                             painter = painterResource(id = R.drawable.notificacion),
                             contentDescription = "Notificaciones",
