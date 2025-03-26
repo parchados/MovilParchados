@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,22 +29,17 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.parchadosapp.R
 import com.example.parchadosapp.ui.theme.*
-import androidx.compose.material3.TopAppBarDefaults
-
-
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(navController: NavController) {
-    val context = LocalContext.current
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        uri?.let { imageUri = it }
-    }
+    ) { uri: Uri? -> uri?.let { imageUri = it } }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -64,38 +60,37 @@ fun PerfilScreen(navController: NavController) {
         }
     )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Perfil",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = PrimaryColor
-                    )
-                },
-                modifier = Modifier.background(BackgroundColor)
-            )
-
-        },
-        containerColor = BackgroundColor
-    ) { paddingValues ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8F5F0)), // Fondo beige elegante
+        contentAlignment = Alignment.TopCenter
+    ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 20.dp)
-                .background(BackgroundColor),
+                .fillMaxWidth(0.9f)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = Modifier.height(30.dp))
+            // Título "Parchados" con el nombre de usuario
+            Text(
+                text = "Juan", // Nombre de usuario
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontFamily = BowlbyOneSC,
+                    fontSize = 38.sp,
+                    color = Color(0xFF003F5C) // Azul profundo
+                )
+            )
 
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // Imagen de perfil (hago la imagen más pequeña y centrada)
             Box(
                 modifier = Modifier
-                    .size(200.dp)
+                    .size(120.dp) // Imagen más pequeña
                     .clip(CircleShape)
-                    .background(DetailColor.copy(alpha = 0.2f)),
+                    .background(Color(0xFF2F4B7C)), // Azul de fondo
                 contentAlignment = Alignment.Center
             ) {
                 when {
@@ -109,7 +104,6 @@ fun PerfilScreen(navController: NavController) {
                                 .clip(CircleShape)
                         )
                     }
-
                     imageUri != null -> {
                         Image(
                             painter = rememberAsyncImagePainter(imageUri),
@@ -120,13 +114,12 @@ fun PerfilScreen(navController: NavController) {
                                 .clip(CircleShape)
                         )
                     }
-
                     else -> {
                         Icon(
                             painter = painterResource(id = R.drawable.perfil),
                             contentDescription = null,
-                            modifier = Modifier.size(100.dp),
-                            tint = SecondaryColor
+                            modifier = Modifier.size(70.dp), // Tamaño más pequeño de la imagen
+                            tint = Color.White // Cambié a blanco para contrastar con el fondo azul
                         )
                     }
                 }
@@ -134,34 +127,44 @@ fun PerfilScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            Button(
-                onClick = { galleryLauncher.launch("image/*") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp)
-                    .clip(CircleShape),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryColor,
-                    contentColor = White
-                )
+            // Botones horizontales con imágenes, centrados
+            Row(
+                horizontalArrangement = Arrangement.Center, // Centramos los botones
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Elegir desde galería", style = MaterialTheme.typography.bodyLarge)
-            }
+                // Botón para elegir desde galería
+                IconButton(
+                    onClick = { galleryLauncher.launch("image/*") },
+                    modifier = Modifier
+                        .size(50.dp) // Tamaño más pequeño del botón
+                        .clip(CircleShape)
+                        .background(Color(0xFFEAC67A)) // Amarillo de fondo
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.galeria), // Imagen de galería
+                        contentDescription = "Elegir desde galería",
+                        modifier = Modifier.size(30.dp), // Ícono más pequeño
+                        tint = Color(0xFF003F5C) // Azul de los íconos
+                    )
+                }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.width(16.dp)) // Espacio entre los botones
 
-            Button(
-                onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp)
-                    .clip(CircleShape),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryColor,
-                    contentColor = White
-                )
-            ) {
-                Text("Tomar foto con cámara", style = MaterialTheme.typography.bodyLarge)
+                // Botón para tomar foto con cámara
+                IconButton(
+                    onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                    modifier = Modifier
+                        .size(50.dp) // Tamaño más pequeño del botón
+                        .clip(CircleShape)
+                        .background(Color(0xFFEAC67A)) // Amarillo de fondo
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.camara), // Imagen de cámara
+                        contentDescription = "Tomar foto con cámara",
+                        modifier = Modifier.size(30.dp), // Ícono más pequeño
+                        tint = Color(0xFF003F5C) // Azul de los íconos
+                    )
+                }
             }
         }
     }
