@@ -97,6 +97,7 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
             )
         }
 
+
         // Botón flotante "P"
         Box(
             modifier = Modifier

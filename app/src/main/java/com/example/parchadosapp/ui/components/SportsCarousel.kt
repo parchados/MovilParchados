@@ -1,6 +1,7 @@
 package com.example.parchadosapp.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.parchadosapp.R
+import androidx.navigation.NavController
+
 
 data class Sport(
     val name: String,
@@ -23,7 +26,7 @@ data class Sport(
 )
 
 @Composable
-fun SportsCarousel() {
+fun SportsCarousel(navController: NavController, onSportSelected: (String) -> Unit) {
     val sports = listOf(
         Sport("Fútbol", "¿Último gol gana?", R.drawable.futbol),
         Sport("Baloncesto", "¿Alguna reta?", R.drawable.basket),
@@ -45,11 +48,69 @@ fun SportsCarousel() {
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(sports.size) { index ->
-                SportCard(sports[index])
+                SportCard(
+                    sport = sports[index],
+                    onClick = {
+                        // Pasamos el nombre del deporte seleccionado
+                        onSportSelected(sports[index].name)
+                    }
+                )
             }
         }
     }
 }
+
+@Composable
+fun SportCard(sport: Sport, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(120.dp)
+            .padding(top = 24.dp)
+            .clickable { onClick() } // Accion al hacer clic
+    ) {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .height(100.dp) // Ajuste de altura
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 36.dp) // Ajustado para dejar espacio para la imagen
+            ) {
+                Text(
+                    text = sport.expression,
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = sport.name,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF003F5C)
+                )
+            }
+        }
+
+        Image(
+            painter = painterResource(id = sport.imageRes),
+            contentDescription = sport.name,
+            modifier = Modifier
+                .size(60.dp)
+                .align(Alignment.TopCenter)
+                .offset(y = (-30).dp)
+                .clip(RoundedCornerShape(50))
+        )
+    }
+}
+
 
 @Composable
 fun SportCard(sport: Sport) {

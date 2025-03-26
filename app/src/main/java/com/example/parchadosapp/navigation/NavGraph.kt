@@ -22,12 +22,20 @@ fun NavGraph(navController: NavHostController, context: Context) {
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
         composable("home") { HomeScreen(navController, context) }
-        composable("map") { MapScreen(navController, context) }
+        composable("map") {
+            MapScreen(navController, context, null)  // Aquí no pasas filtro, simplemente 'null'
+        }
+
+// Ruta con filtro (cuando se hace clic en una card del carrusel)
+        composable("map/{selectedSport}") { backStackEntry ->
+            val selectedSport = backStackEntry.arguments?.getString("selectedSport")
+            MapScreen(navController, context, selectedSport)  // Aquí pasas el filtro
+        }
         composable("parche") { ParcheScreen(navController, context) }
         composable("calendar") { GoogleCalendarScreen(navController) }
         composable("notifications") { NotificationsScreen(navController) }
 
-        // ✅ Nuevo destino para la pantalla de perfil
+
         composable("perfil") { PerfilScreen(navController) }
     }
 }

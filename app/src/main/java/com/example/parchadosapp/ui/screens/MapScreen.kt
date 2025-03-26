@@ -28,8 +28,14 @@ import com.example.parchadosapp.ui.theme.BrightRetro
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MapScreen(navController: NavController, context: Context) {
-    var selectedFilters by remember { mutableStateOf<Set<String>>(emptySet()) } // ✅ Ahora es un conjunto de filtros
+fun MapScreen(navController: NavController, context: Context, selectedSport: String?) {
+    // Estado para los filtros seleccionados
+    var selectedFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
+
+    // Si se recibe un filtro (un deporte), se aplica como filtro seleccionado
+    if (selectedSport != null && selectedFilters.isEmpty()) {
+        selectedFilters = setOf(selectedSport)
+    }
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) }
@@ -39,10 +45,10 @@ fun MapScreen(navController: NavController, context: Context) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // 🔹 Mapa de Google
+            // 🔹 Mapa de Google (aquí puedes integrar tu vista de mapa)
             GoogleMapView(context = context)
 
-            // 🔹 Sección de filtros y búsqueda
+            // 🔹 Filtros y búsqueda
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -54,11 +60,11 @@ fun MapScreen(navController: NavController, context: Context) {
                     selectedFilters = selectedFilters,
                     onFilterSelected = { filter ->
                         selectedFilters = if (filter == null) {
-                            emptySet() // ✅ Borra todos los filtros cuando el botón de reset es presionado
+                            emptySet() // Limpiar filtros
                         } else if (filter in selectedFilters) {
-                            selectedFilters - filter // ✅ Si ya estaba seleccionado, lo quita
+                            selectedFilters - filter // Quitar filtro si ya estaba seleccionado
                         } else {
-                            selectedFilters + filter // ✅ Agrega si no estaba seleccionado
+                            selectedFilters + filter // Agregar filtro
                         }
                     }
                 )
@@ -66,6 +72,7 @@ fun MapScreen(navController: NavController, context: Context) {
         }
     }
 }
+
 
 
 
@@ -110,8 +117,8 @@ fun FilterSection(selectedFilters: Set<String>, onFilterSelected: (String?) -> U
     var isSportsFilter by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
 
-    val normalFilters = listOf("Courts", "Games", "Tournaments", "Leagues", "Events", "Training", "Clubs")
-    val sportsFilters = listOf("Soccer", "Basketball", "Tennis", "Volleyball", "Baseball", "Swimming", "Running")
+    val normalFilters = listOf("Parches", "Torneos", "Clubs", "Eventos")
+    val sportsFilters = listOf("Fútbol", "Baloncesto", "Tenis", "Billar")
 
     val currentFilters = if (isSportsFilter) sportsFilters else normalFilters
     val currentIcon = if (isSportsFilter) R.drawable.deportes else R.drawable.filtro

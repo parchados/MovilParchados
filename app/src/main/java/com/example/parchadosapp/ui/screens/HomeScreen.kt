@@ -138,7 +138,10 @@ fun HomeScreen(navController: NavController, context: Context) {
             Spacer(modifier = Modifier.height(30.dp))
 
             // 🔹 Carrusel de deportes
-            SportsCarousel()
+            SportsCarousel(navController = navController, onSportSelected = { selectedSport ->
+
+                navController.navigate("map/$selectedSport")
+            })
 
             Spacer(modifier = Modifier.height(40.dp))
 
