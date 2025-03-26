@@ -25,7 +25,9 @@ data class Patch(
     val date: String,
     val time: String,
     val remaining: Int,
-    val sport: String
+    val sport: String,
+    val latitude: Double,
+    val longitude: Double
 )
 
 @Composable

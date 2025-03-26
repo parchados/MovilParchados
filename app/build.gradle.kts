@@ -82,11 +82,12 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Dependencias de mapas y servicios de ubicación
-    implementation("org.osmdroid:osmdroid-android:6.1.14")
     implementation("com.google.android.gms:play-services-maps:18.1.0") // Solo esta versión
     implementation("com.google.android.gms:play-services-location:21.0.1") // Solo esta versión
     implementation("com.google.android.gms:play-services-base:17.6.0")
     implementation("com.google.android.gms:play-services-auth:20.0.1")
+    implementation("com.google.maps.android:maps-compose:2.1.0")
+
 
     // Retrofit y Gson
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

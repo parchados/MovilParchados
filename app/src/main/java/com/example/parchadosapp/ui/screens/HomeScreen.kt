@@ -34,38 +34,46 @@ fun HomeScreen(navController: NavController, context: Context) {
         Patch(
             image = R.drawable.campo_futbol, // Imagen del lugar
             name = "Campo de Fútbol A",
-            address = "Calle Fútbol 123",
-            date = "Sábado, 24 de Marzo",
+            address = "Cl 63 #15-32, Bogotá",
+            date = "Sábado, 29 de Marzo",
             time = "3:00 PM",
             remaining = 5,
-            sport = "Fútbol"
+            sport = "Fútbol",
+            latitude = 4.650133,
+            longitude = -74.066019
         ),
         Patch(
             image = R.drawable.cancha_basket, // Imagen del lugar
             name = "Cancha de Baloncesto B",
-            address = "Avenida Basket 456",
-            date = "Domingo, 25 de Marzo",
+            address = "Cl 62 #3-50, Bogotá",
+            date = "Domingo, 30 de Marzo",
             time = "6:00 PM",
             remaining = 3,
-            sport = "Baloncesto"
+            sport = "Baloncesto",
+            latitude = 4.645390,
+            longitude = -74.057067
         ),
         Patch(
             image = R.drawable.billarl, // Imagen del lugar
             name = "Sala de Billar Central",
-            address = "Calle Billar 789",
-            date = "Lunes, 26 de Marzo",
+            address = "Cl. 45 #13-40, Santa Fé, Bogotá",
+            date = "Lunes, 31 de Marzo",
             time = "8:00 PM",
             remaining = 2,
-            sport = "Billar"
+            sport = "Billar",
+            latitude = 4.632527,
+            longitude = -74.066987
         ),
         Patch(
             image = R.drawable.cancha_tenis, // Imagen del lugar
             name = "Cancha de Tenis A",
-            address = "Avenida Tenis 321",
-            date = "Martes, 27 de Marzo",
+            address = "Cl. 51 #4-06, Bogotá",
+            date = "Lunes, 31 de Marzo",
             time = "5:00 PM",
             remaining = 4,
-            sport = "Tenis"
+            sport = "Tenis",
+            latitude = 4.635916,
+            longitude = -74.061317
         )
     )
 
