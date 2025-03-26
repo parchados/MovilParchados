@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 fun PerfilScreen(navController: NavController) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var showDialog by remember { mutableStateOf(false) } // Para controlar el pop-up
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -73,6 +74,21 @@ fun PerfilScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
+            // Icono de "Atrás" en la parte superior izquierda
+            IconButton(
+                onClick = { navController.popBackStack() }, // Regresar a la pantalla anterior
+                modifier = Modifier
+                    .align(Alignment.Start) // Alineado a la izquierda
+                    .padding(top = 16.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.atras), // Imagen del ícono de atrás
+                    contentDescription = "Atrás",
+                    modifier = Modifier.size(30.dp),
+                    tint = Color(0xFF003F5C) // Azul profundo para el ícono
+                )
+            }
+
             // Título "Parchados" con el nombre de usuario
             Text(
                 text = "Juan", // Nombre de usuario
@@ -85,7 +101,7 @@ fun PerfilScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Imagen de perfil (hago la imagen más pequeña y centrada)
+            // Imagen de perfil
             Box(
                 modifier = Modifier
                     .size(120.dp) // Imagen más pequeña
@@ -166,6 +182,55 @@ fun PerfilScreen(navController: NavController) {
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // Botón azul de "Salir" al final
+            Spacer(modifier = Modifier.weight(1f)) // Esto empuja el botón "Salir" hacia abajo
+            Button(
+                onClick = { showDialog = true }, // Mostrar el diálogo de confirmación
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(55.dp)
+                    .clip(RoundedCornerShape(10.dp)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF003F5C), // Azul de fondo
+                    contentColor = Color.White // Blanco para el texto
+                )
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.salir), // Logo de "Salir" (en azul)
+                    contentDescription = "Salir",
+                    modifier = Modifier.size(24.dp), // Tamaño del ícono
+                    tint = Color.White // Blanco para el ícono
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Salir", style = MaterialTheme.typography.bodyLarge.copy(color = Color.White))
+            }
+        }
+
+        // Mostrar el diálogo de confirmación cuando se presiona el botón "Salir"
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("Confirmar salida") },
+                text = { Text("¿Estás seguro de que quieres salir de la aplicación?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            navController.navigate("login") // Navegar al login si se confirma
+                            showDialog = false
+                        }
+                    ) {
+                        Text("Sí")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("No")
+                    }
+                }
+            )
         }
     }
 }
