@@ -13,3 +13,5 @@ val DetailColor = Color(0xFFA5C8E1)  // Azul pastel (para elementos decorativos 
 // Extras
 val White = Color(0xFFFFFFFF)
 val Black = Color(0xFF000000)
+val Red = Color(0xFFE63946)
+
