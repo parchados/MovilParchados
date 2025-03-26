@@ -26,7 +26,7 @@ data class Sport(
 )
 
 @Composable
-fun SportsCarousel(navController: NavController, onSportSelected: (String) -> Unit) {
+fun SportsCarousel(navController: NavController) {
     val sports = listOf(
         Sport("Fútbol", "¿Último gol gana?", R.drawable.futbol),
         Sport("Baloncesto", "¿Alguna reta?", R.drawable.basket),
@@ -51,14 +51,15 @@ fun SportsCarousel(navController: NavController, onSportSelected: (String) -> Un
                 SportCard(
                     sport = sports[index],
                     onClick = {
-                        // Pasamos el nombre del deporte seleccionado
-                        onSportSelected(sports[index].name)
+                        val selectedSport = sports[index].name
+                        navController.navigate("map/$selectedSport")
                     }
                 )
             }
         }
     }
 }
+
 
 @Composable
 fun SportCard(sport: Sport, onClick: () -> Unit) {
@@ -112,52 +113,3 @@ fun SportCard(sport: Sport, onClick: () -> Unit) {
 }
 
 
-@Composable
-fun SportCard(sport: Sport) {
-    Box(
-        modifier = Modifier
-            .width(120.dp)
-            .padding(top = 24.dp)
-    ) {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .height(100.dp) // ⬅️ Ajustado aquí
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 36.dp) // ⬅️ Alineado justo para dejar espacio a la imagen
-            ) {
-                Text(
-                    text = sport.expression,
-                    fontSize = 12.sp,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = sport.name,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF003F5C)
-                )
-            }
-        }
-
-        Image(
-            painter = painterResource(id = sport.imageRes),
-            contentDescription = sport.name,
-            modifier = Modifier
-                .size(60.dp)
-                .align(Alignment.TopCenter)
-                .offset(y = (-30).dp)
-                .clip(RoundedCornerShape(50))
-        )
-    }
-}

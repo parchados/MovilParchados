@@ -110,7 +110,15 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
         )
     )
 
+    // Variable de estado para los filtros
     var selectedFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
+
+    // Filtrar parches según los filtros seleccionados
+    val filteredPatches = if (selectedFilters.isEmpty()) {
+        patches // Si no hay filtros seleccionados, mostrar todos los parches
+    } else {
+        patches.filter { patch -> patch.sport in selectedFilters }
+    }
 
     val cameraPositionState = rememberCameraPositionState {
         // Valor inicial de la cámara, se actualizará cuando se obtenga la ubicación
@@ -132,8 +140,8 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Mapa de Google
-            GoogleMapView(context = context, markers = patches, userLocation = userLocation, cameraPositionState = cameraPositionState)
+            // Mapa de Google con los parches filtrados
+            GoogleMapView(context = context, markers = filteredPatches, userLocation = userLocation, cameraPositionState = cameraPositionState)
 
             // Botón flotante para centrar el mapa en la ubicación actual
             userLocation?.let {
@@ -150,12 +158,10 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
                     Icon(
                         painter = painterResource(id = R.drawable.ic_location), // La imagen ic_location
                         contentDescription = "Ubicación Actual",
-                        tint =  White // Utilizando AccentColor para el ícono (amarillo dorado)
+                        tint = White // Utilizando AccentColor para el ícono (amarillo dorado)
                     )
                 }
             }
-
-
 
             // Filtros y búsqueda
             Box(
@@ -181,6 +187,7 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
         }
     }
 }
+
 
 
 @Composable
