@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.R
 import com.example.parchadosapp.ui.components.BottomNavigationBar
-import com.example.parchadosapp.ui.components.GoogleMapView
 import com.example.parchadosapp.ui.components.Patch
 import com.example.parchadosapp.ui.theme.BrightRetro
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -40,6 +39,7 @@ import com.google.maps.android.compose.MarkerState
 import android.location.Location
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.parchadosapp.ui.theme.*
 import com.google.maps.android.compose.CameraPositionState
 
 
@@ -62,10 +62,10 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
         }
     }
 
-    // Lista de parches con sus coordenadas (simulando con coordenadas ficticias)
+    // Lista de parches con sus coordenadas
     val patches = listOf(
         Patch(
-            image = R.drawable.campo_futbol, // Imagen del lugar
+            image = R.drawable.campo_futbol,
             name = "Campo de Fútbol A",
             address = "Cl 63 #15-32, Bogotá",
             date = "Sábado, 29 de Marzo",
@@ -76,7 +76,7 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
             longitude = -74.066019
         ),
         Patch(
-            image = R.drawable.cancha_basket, // Imagen del lugar
+            image = R.drawable.cancha_basket,
             name = "Cancha de Baloncesto B",
             address = "Cl 62 #3-50, Bogotá",
             date = "Domingo, 30 de Marzo",
@@ -87,7 +87,7 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
             longitude = -74.057067
         ),
         Patch(
-            image = R.drawable.billarl, // Imagen del lugar
+            image = R.drawable.billarl,
             name = "Sala de Billar Central",
             address = "Cl. 45 #13-40, Santa Fé, Bogotá",
             date = "Lunes, 31 de Marzo",
@@ -98,7 +98,7 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
             longitude = -74.066987
         ),
         Patch(
-            image = R.drawable.cancha_tenis, // Imagen del lugar
+            image = R.drawable.cancha_tenis,
             name = "Cancha de Tenis A",
             address = "Cl. 51 #4-06, Bogotá",
             date = "Lunes, 31 de Marzo",
@@ -113,7 +113,15 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
     var selectedFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(4.60971, -74.08175), 12f) // Vista predeterminada
+        // Valor inicial de la cámara, se actualizará cuando se obtenga la ubicación
+        position = CameraPosition.fromLatLngZoom(LatLng(4.60971, -74.08175), 12f)
+    }
+
+    // Cuando se actualiza la ubicación, mover la cámara
+    LaunchedEffect(userLocation) {
+        userLocation?.let {
+            cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
+        }
     }
 
     Scaffold(
@@ -127,27 +135,27 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
             // Mapa de Google
             GoogleMapView(context = context, markers = patches, userLocation = userLocation, cameraPositionState = cameraPositionState)
 
-            // Botón para centrar el mapa en la ubicación actual
+            // Botón flotante para centrar el mapa en la ubicación actual
             userLocation?.let {
-                IconButton(
+                FloatingActionButton(
                     onClick = {
                         cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f) // Zoom de 15
                     },
                     modifier = Modifier
-                        .size(55.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.Yellow)
-                        .padding(8.dp)
-                        .align(Alignment.TopStart)
+                        .size(72.dp) // Aumentamos el tamaño del botón a 72.dp
+                        .padding(16.dp) // Espaciado alrededor del botón
+                        .align(Alignment.BottomStart) // Ubicación en la esquina inferior izquierda
+                        .background(Color.Transparent) // Fondo transparente
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_location), // La imagen ic_location
                         contentDescription = "Ubicación Actual",
-                        tint = Color.Blue,
-                        modifier = Modifier.size(40.dp)
+                        tint =  White // Utilizando AccentColor para el ícono (amarillo dorado)
                     )
                 }
             }
+
+
 
             // Filtros y búsqueda
             Box(
@@ -173,6 +181,7 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
         }
     }
 }
+
 
 @Composable
 fun GoogleMapView(context: Context, markers: List<Patch>, userLocation: LatLng?, cameraPositionState: CameraPositionState) {
@@ -200,7 +209,6 @@ fun GoogleMapView(context: Context, markers: List<Patch>, userLocation: LatLng?,
         }
     }
 }
-
 
 
 /**
