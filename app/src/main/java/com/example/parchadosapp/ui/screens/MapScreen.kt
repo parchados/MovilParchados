@@ -111,7 +111,12 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
     )
 
     // Variable de estado para los filtros
-    var selectedFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var selectedFilters by remember {
+        mutableStateOf(
+            selectedSport?.let { setOf(it) } ?: emptySet()
+        )
+    }
+
 
     // Filtrar parches según los filtros seleccionados
     val filteredPatches = if (selectedFilters.isEmpty()) {
