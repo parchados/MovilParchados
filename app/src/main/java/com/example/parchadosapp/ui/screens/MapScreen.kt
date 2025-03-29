@@ -49,7 +49,8 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
 
-    // Obtener la ubicación actual del usuario
+    var searchText by remember { mutableStateOf("") }
+
     LaunchedEffect(true) {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
@@ -62,7 +63,6 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
         }
     }
 
-    // Lista de parches con sus coordenadas
     val patches = listOf(
         Patch(
             image = R.drawable.campo_futbol,
@@ -110,27 +110,23 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
         )
     )
 
-    // Variable de estado para los filtros
     var selectedFilters by remember {
         mutableStateOf(
             selectedSport?.let { setOf(it) } ?: emptySet()
         )
     }
 
-
-    // Filtrar parches según los filtros seleccionados
-    val filteredPatches = if (selectedFilters.isEmpty()) {
-        patches // Si no hay filtros seleccionados, mostrar todos los parches
-    } else {
-        patches.filter { patch -> patch.sport in selectedFilters }
+    // 🔍 Nuevo filtro combinado: por deporte y por texto
+    val filteredPatches = patches.filter { patch ->
+        val matchesSport = selectedFilters.isEmpty() || patch.sport in selectedFilters
+        val matchesSearch = searchText.isBlank() || patch.name.contains(searchText, ignoreCase = true)
+        matchesSport && matchesSearch
     }
 
     val cameraPositionState = rememberCameraPositionState {
-        // Valor inicial de la cámara, se actualizará cuando se obtenga la ubicación
         position = CameraPosition.fromLatLngZoom(LatLng(4.60971, -74.08175), 12f)
     }
 
-    // Cuando se actualiza la ubicación, mover la cámara
     LaunchedEffect(userLocation) {
         userLocation?.let {
             cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
@@ -145,30 +141,32 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Mapa de Google con los parches filtrados
-            GoogleMapView(context = context, markers = filteredPatches, userLocation = userLocation, cameraPositionState = cameraPositionState)
+            GoogleMapView(
+                context = context,
+                markers = filteredPatches,
+                userLocation = userLocation,
+                cameraPositionState = cameraPositionState
+            )
 
-            // Botón flotante para centrar el mapa en la ubicación actual
             userLocation?.let {
                 FloatingActionButton(
                     onClick = {
-                        cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f) // Zoom de 15
+                        cameraPositionState.position = CameraPosition.fromLatLngZoom(it, 15f)
                     },
                     modifier = Modifier
-                        .size(72.dp) // Aumentamos el tamaño del botón a 72.dp
-                        .padding(16.dp) // Espaciado alrededor del botón
-                        .align(Alignment.BottomStart) // Ubicación en la esquina inferior izquierda
-                        .background(Color.Transparent) // Fondo transparente
+                        .size(72.dp)
+                        .padding(16.dp)
+                        .align(Alignment.BottomStart)
+                        .background(Color.Transparent)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_location), // La imagen ic_location
+                        painter = painterResource(id = R.drawable.ic_location),
                         contentDescription = "Ubicación Actual",
-                        tint = White // Utilizando AccentColor para el ícono (amarillo dorado)
+                        tint = White
                     )
                 }
             }
 
-            // Filtros y búsqueda
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -186,12 +184,15 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
                         } else {
                             selectedFilters + filter
                         }
-                    }
+                    },
+                    searchText = searchText,
+                    onSearchTextChanged = { searchText = it }
                 )
             }
         }
     }
 }
+
 
 
 
@@ -260,9 +261,13 @@ fun SearchBar(
  * 🔹 Botones de filtro con mejor diseño.
  */
 @Composable
-fun FilterSection(selectedFilters: Set<String>, onFilterSelected: (String?) -> Unit) {
+fun FilterSection(
+    selectedFilters: Set<String>,
+    onFilterSelected: (String?) -> Unit,
+    searchText: String,
+    onSearchTextChanged: (String) -> Unit
+) {
     var isSportsFilter by remember { mutableStateOf(false) }
-    var searchText by remember { mutableStateOf("") }
 
     val normalFilters = listOf("Parches", "Torneos", "Clubs", "Eventos")
     val sportsFilters = listOf("Fútbol", "Baloncesto", "Tenis", "Billar")
@@ -277,20 +282,17 @@ fun FilterSection(selectedFilters: Set<String>, onFilterSelected: (String?) -> U
             .padding(horizontal = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 🔹 Barra de búsqueda + Botón de filtro en la misma fila
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 🔹 Barra de búsqueda más pequeña
             SearchBar(
                 modifier = Modifier.fillMaxWidth(0.85f),
                 searchText = searchText,
-                onSearchTextChanged = { searchText = it }
+                onSearchTextChanged = onSearchTextChanged
             )
 
-            // 🔹 Botón para cambiar entre filtros normales y deportes
             IconButton(
                 onClick = { isSportsFilter = !isSportsFilter },
                 modifier = Modifier.size(40.dp)
@@ -305,13 +307,11 @@ fun FilterSection(selectedFilters: Set<String>, onFilterSelected: (String?) -> U
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 🔹 Filtros en carrusel + Botón Reset alineado correctamente
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 🔹 Carrusel de filtros dentro de un Row con scroll
             Row(
                 modifier = Modifier
                     .weight(1f)
@@ -326,27 +326,26 @@ fun FilterSection(selectedFilters: Set<String>, onFilterSelected: (String?) -> U
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
                             .border(1.dp, Color(0xFF003F5C), RoundedCornerShape(8.dp))
-                            .background(if (isSelected) Color(0xFF003F5C) else Color.White) // ✅ Ahora cubre todo el botón
+                            .background(if (isSelected) Color(0xFF003F5C) else Color.White)
                     ) {
                         Text(
                             text = filter,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = if (isSelected) Color.White else Color(0xFF003F5C) // ✅ Mantiene el contraste correcto
+                            color = if (isSelected) Color.White else Color(0xFF003F5C)
                         )
                     }
                 }
             }
 
-            // 🔹 Botón de Reset alineado correctamente al lado del carrusel
             IconButton(
-                onClick = { onFilterSelected(null) }, // ✅ Ahora resetea todos los filtros
+                onClick = { onFilterSelected(null) },
                 modifier = Modifier.size(40.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.reset),
                     contentDescription = "Resetear filtros",
-                    modifier = Modifier.size(20.dp), // ✅ Reduce solo el tamaño del icono
+                    modifier = Modifier.size(20.dp),
                     tint = Color(0xFF003F5C)
                 )
             }
@@ -355,4 +354,5 @@ fun FilterSection(selectedFilters: Set<String>, onFilterSelected: (String?) -> U
         Spacer(modifier = Modifier.height(12.dp))
     }
 }
+
 
