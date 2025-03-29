@@ -37,8 +37,10 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.MarkerState
 import android.location.Location
+import androidx.compose.foundation.clickable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.parchadosapp.ui.components.PatchCard
 import com.example.parchadosapp.ui.theme.*
 import com.google.maps.android.compose.CameraPositionState
 
@@ -48,7 +50,7 @@ import com.google.maps.android.compose.CameraPositionState
 fun MapScreen(navController: NavController, context: Context, selectedSport: String?) {
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     var userLocation by remember { mutableStateOf<LatLng?>(null) }
-
+    var selectedPatch by remember { mutableStateOf<Patch?>(null) } // 👈 Estado para el marcador seleccionado
     var searchText by remember { mutableStateOf("") }
 
     LaunchedEffect(true) {
@@ -116,7 +118,6 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
         )
     }
 
-    // 🔍 Nuevo filtro combinado: por deporte y por texto
     val filteredPatches = patches.filter { patch ->
         val matchesSport = selectedFilters.isEmpty() || patch.sport in selectedFilters
         val matchesSearch = searchText.isBlank() || patch.name.contains(searchText, ignoreCase = true)
@@ -145,7 +146,8 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
                 context = context,
                 markers = filteredPatches,
                 userLocation = userLocation,
-                cameraPositionState = cameraPositionState
+                cameraPositionState = cameraPositionState,
+                onMarkerClick = { patch -> selectedPatch = patch } // 👈 Cuando se toca un marcador
             )
 
             userLocation?.let {
@@ -189,39 +191,63 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
                     onSearchTextChanged = { searchText = it }
                 )
             }
+
+            // 👇 Mostrar el popup (PatchCard) si hay uno seleccionado
+            selectedPatch?.let { patch ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter)
+                        .padding(top = 152.dp) // 👈 Ajusta este valor según la altura real del filtro
+                        .padding(horizontal = 16.dp)
+                        .clickable { selectedPatch = null }
+                ) {
+                    PatchCard(patch = patch)
+                }
+            }
         }
     }
 }
+
 
 
 
 
 @Composable
-fun GoogleMapView(context: Context, markers: List<Patch>, userLocation: LatLng?, cameraPositionState: CameraPositionState) {
+fun GoogleMapView(
+    context: Context,
+    markers: List<Patch>,
+    userLocation: LatLng?,
+    cameraPositionState: CameraPositionState,
+    onMarkerClick: (Patch) -> Unit
+) {
     GoogleMap(
         cameraPositionState = cameraPositionState
     ) {
-        // Todos los marcadores de los parches tendrán el mismo color (gris en este caso)
         markers.forEach { patch ->
             Marker(
                 state = MarkerState(position = LatLng(patch.latitude, patch.longitude)),
                 title = patch.name,
                 snippet = patch.address,
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED) // Color uniforme para todos los parches
+                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
+                onClick = {
+                    onMarkerClick(patch)
+                    true // Ya manejamos el click
+                }
             )
         }
 
-        // Mostrar la ubicación del usuario si está disponible
         userLocation?.let {
             Marker(
                 state = MarkerState(position = it),
                 title = "Tu ubicación",
                 snippet = "Estás aquí",
-                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE) // Círculo azul de la ubicación actual
+                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
             )
         }
     }
 }
+
 
 
 /**
