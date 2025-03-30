@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.R
+import com.example.parchadosapp.data.PatchRepository
 import com.example.parchadosapp.ui.components.BottomNavigationBar
 
 import com.example.parchadosapp.ui.components.Patch
@@ -30,57 +32,12 @@ import com.example.parchadosapp.ui.theme.BrightRetro
 @Composable
 fun HomeScreen(navController: NavController, context: Context) {
     // Lista de parches
-    val patches = listOf(
-        Patch(
-            image = R.drawable.campo_futbol, // Imagen del lugar
-            name = "Campo de Fútbol A",
-            address = "Cl 63 #15-32, Bogotá",
-            date = "Sábado, 29 de Marzo",
-            time = "3:00 PM",
-            remaining = 5,
-            sport = "Fútbol",
-            latitude = 4.650133,
-            longitude = -74.066019
-        ),
-        Patch(
-            image = R.drawable.cancha_basket, // Imagen del lugar
-            name = "Cancha de Baloncesto B",
-            address = "Cl 62 #3-50, Bogotá",
-            date = "Domingo, 30 de Marzo",
-            time = "6:00 PM",
-            remaining = 3,
-            sport = "Baloncesto",
-            latitude = 4.645390,
-            longitude = -74.057067
-        ),
-        Patch(
-            image = R.drawable.billarl, // Imagen del lugar
-            name = "Sala de Billar Central",
-            address = "Cl. 45 #13-40, Santa Fé, Bogotá",
-            date = "Lunes, 31 de Marzo",
-            time = "8:00 PM",
-            remaining = 2,
-            sport = "Billar",
-            latitude = 4.632527,
-            longitude = -74.066987
-        ),
-        Patch(
-            image = R.drawable.cancha_tenis, // Imagen del lugar
-            name = "Cancha de Tenis A",
-            address = "Cl. 51 #4-06, Bogotá",
-            date = "Lunes, 31 de Marzo",
-            time = "5:00 PM",
-            remaining = 4,
-            sport = "Tenis",
-            latitude = 4.635916,
-            longitude = -74.061317
-        )
-    )
+    val patches = PatchRepository.patches
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F5F0)), // Fondo beige
+            .background(Color(0xFFF8F5F0)),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -150,11 +107,11 @@ fun HomeScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // 🔹 Lista de parches disponibles envuelta en LazyColumn
+            // 🔹 Lista de parches disponibles
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)  // Esto hace que ocupe el espacio disponible antes del navbar
+                    .weight(1f)
             ) {
                 item {
                     Text(
@@ -165,16 +122,16 @@ fun HomeScreen(navController: NavController, context: Context) {
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }
-                items(patches) { patch ->
-                    PatchCard(patch = patch)
+                itemsIndexed(patches) { index, patch ->
+                    PatchCard(patch = patch) {
+                        navController.navigate("patch_detail/$index")
+                    }
                 }
             }
 
-            // Agregar un espacio al final para evitar que el navbar lo tape
-            Spacer(modifier = Modifier.height(120.dp)) // Aumenté el espacio a 120dp
+            Spacer(modifier = Modifier.height(120.dp))
         }
 
-        // 🔹 Navbar en la parte inferior
         BottomNavigationBar(navController, Modifier.align(Alignment.BottomCenter))
     }
 }

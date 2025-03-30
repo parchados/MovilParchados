@@ -40,6 +40,7 @@ import android.location.Location
 import androidx.compose.foundation.clickable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.parchadosapp.data.PatchRepository
 import com.example.parchadosapp.ui.components.PatchCard
 import com.example.parchadosapp.ui.theme.*
 import com.google.maps.android.compose.CameraPositionState
@@ -65,52 +66,7 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
         }
     }
 
-    val patches = listOf(
-        Patch(
-            image = R.drawable.campo_futbol,
-            name = "Campo de Fútbol A",
-            address = "Cl 63 #15-32, Bogotá",
-            date = "Sábado, 29 de Marzo",
-            time = "3:00 PM",
-            remaining = 5,
-            sport = "Fútbol",
-            latitude = 4.650133,
-            longitude = -74.066019
-        ),
-        Patch(
-            image = R.drawable.cancha_basket,
-            name = "Cancha de Baloncesto B",
-            address = "Cl 62 #3-50, Bogotá",
-            date = "Domingo, 30 de Marzo",
-            time = "6:00 PM",
-            remaining = 3,
-            sport = "Baloncesto",
-            latitude = 4.645390,
-            longitude = -74.057067
-        ),
-        Patch(
-            image = R.drawable.billarl,
-            name = "Sala de Billar Central",
-            address = "Cl. 45 #13-40, Santa Fé, Bogotá",
-            date = "Lunes, 31 de Marzo",
-            time = "8:00 PM",
-            remaining = 2,
-            sport = "Billar",
-            latitude = 4.632527,
-            longitude = -74.066987
-        ),
-        Patch(
-            image = R.drawable.cancha_tenis,
-            name = "Cancha de Tenis A",
-            address = "Cl. 51 #4-06, Bogotá",
-            date = "Lunes, 31 de Marzo",
-            time = "5:00 PM",
-            remaining = 4,
-            sport = "Tenis",
-            latitude = 4.635916,
-            longitude = -74.061317
-        )
-    )
+    val patches = PatchRepository.patches
 
     var selectedFilters by remember {
         mutableStateOf(
@@ -194,15 +150,24 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
 
             // 👇 Mostrar el popup (PatchCard) si hay uno seleccionado
             selectedPatch?.let { patch ->
+                val patchIndex = patches.indexOfFirst { it.name == patch.name } // o usa otro identificador único si prefieres
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)
-                        .padding(top = 152.dp) // 👈 Ajusta este valor según la altura real del filtro
+                        .padding(top = 152.dp)
                         .padding(horizontal = 16.dp)
-                        .clickable { selectedPatch = null }
                 ) {
-                    PatchCard(patch = patch)
+                    PatchCard(
+                        patch = patch,
+                        onClick = {
+                            selectedPatch = null
+                            if (patchIndex != -1) {
+                                navController.navigate("patch_detail/$patchIndex")
+                            }
+                        }
+                    )
                 }
             }
         }
