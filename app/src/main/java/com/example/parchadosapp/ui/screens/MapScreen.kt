@@ -176,8 +176,6 @@ fun MapScreen(navController: NavController, context: Context, selectedSport: Str
 
 
 
-
-
 @Composable
 fun GoogleMapView(
     context: Context,

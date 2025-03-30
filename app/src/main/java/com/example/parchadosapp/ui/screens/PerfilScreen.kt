@@ -36,7 +36,10 @@ import androidx.compose.ui.graphics.Color
 fun PerfilScreen(navController: NavController) {
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var showDialog by remember { mutableStateOf(false) } // Para controlar el pop-up
+    var showExitDialog by remember { mutableStateOf(false) } // Para salir
+    var showNameDialog by remember { mutableStateOf(false) } // Para cambiar nombre
+    var nombreUsuario by remember { mutableStateOf("Juan") } // Nombre editable
+    var nuevoNombre by remember { mutableStateOf("") }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -64,7 +67,7 @@ fun PerfilScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F5F0)), // Fondo beige elegante
+            .background(Color(0xFFF8F5F0)),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -74,39 +77,36 @@ fun PerfilScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
-            // Icono de "Atrás" en la parte superior izquierda
             IconButton(
-                onClick = { navController.popBackStack() }, // Regresar a la pantalla anterior
+                onClick = { navController.popBackStack() },
                 modifier = Modifier
-                    .align(Alignment.Start) // Alineado a la izquierda
+                    .align(Alignment.Start)
                     .padding(top = 16.dp)
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.atras), // Imagen del ícono de atrás
+                    painter = painterResource(id = R.drawable.atras),
                     contentDescription = "Atrás",
                     modifier = Modifier.size(30.dp),
-                    tint = Color(0xFF003F5C) // Azul profundo para el ícono
+                    tint = Color(0xFF003F5C)
                 )
             }
 
-            // Título "Parchados" con el nombre de usuario
             Text(
-                text = "Juan", // Nombre de usuario
+                text = nombreUsuario,
                 style = MaterialTheme.typography.headlineLarge.copy(
                     fontFamily = BowlbyOneSC,
                     fontSize = 38.sp,
-                    color = Color(0xFF003F5C) // Azul profundo
+                    color = Color(0xFF003F5C)
                 )
             )
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Imagen de perfil
             Box(
                 modifier = Modifier
-                    .size(120.dp) // Imagen más pequeña
+                    .size(120.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF2F4B7C)), // Azul de fondo
+                    .background(Color(0xFF2F4B7C)),
                 contentAlignment = Alignment.Center
             ) {
                 when {
@@ -134,8 +134,8 @@ fun PerfilScreen(navController: NavController) {
                         Icon(
                             painter = painterResource(id = R.drawable.perfil),
                             contentDescription = null,
-                            modifier = Modifier.size(70.dp), // Tamaño más pequeño de la imagen
-                            tint = Color.White // Cambié a blanco para contrastar con el fondo azul
+                            modifier = Modifier.size(70.dp),
+                            tint = Color.White
                         )
                     }
                 }
@@ -143,94 +143,140 @@ fun PerfilScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Botones horizontales con imágenes, centrados
+            // Botones de galería y cámara
             Row(
-                horizontalArrangement = Arrangement.Center, // Centramos los botones
+                horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Botón para elegir desde galería
                 IconButton(
                     onClick = { galleryLauncher.launch("image/*") },
                     modifier = Modifier
-                        .size(50.dp) // Tamaño más pequeño del botón
+                        .size(50.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFEAC67A)) // Amarillo de fondo
+                        .background(Color(0xFFEAC67A))
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.galeria), // Imagen de galería
+                        painter = painterResource(id = R.drawable.galeria),
                         contentDescription = "Elegir desde galería",
-                        modifier = Modifier.size(30.dp), // Ícono más pequeño
-                        tint = Color(0xFF003F5C) // Azul de los íconos
+                        modifier = Modifier.size(30.dp),
+                        tint = Color(0xFF003F5C)
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp)) // Espacio entre los botones
+                Spacer(modifier = Modifier.width(16.dp))
 
-                // Botón para tomar foto con cámara
                 IconButton(
                     onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
                     modifier = Modifier
-                        .size(50.dp) // Tamaño más pequeño del botón
+                        .size(50.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFEAC67A)) // Amarillo de fondo
+                        .background(Color(0xFFEAC67A))
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.camara), // Imagen de cámara
+                        painter = painterResource(id = R.drawable.camara),
                         contentDescription = "Tomar foto con cámara",
-                        modifier = Modifier.size(30.dp), // Ícono más pequeño
-                        tint = Color(0xFF003F5C) // Azul de los íconos
+                        modifier = Modifier.size(30.dp),
+                        tint = Color(0xFF003F5C)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Botón azul de "Salir" al final
-            Spacer(modifier = Modifier.weight(1f)) // Esto empuja el botón "Salir" hacia abajo
+            // Botón para cambiar nombre
             Button(
-                onClick = { showDialog = true }, // Mostrar el diálogo de confirmación
+                onClick = {
+                    nuevoNombre = nombreUsuario
+                    showNameDialog = true
+                },
+                modifier = Modifier
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(10.dp)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFEAC67A),
+                    contentColor = Color(0xFF003F5C)
+                )
+            ) {
+                Text("Cambiar nombre", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp))
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Botón de Salir
+            Button(
+                onClick = { showExitDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(55.dp)
                     .clip(RoundedCornerShape(10.dp)),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF003F5C), // Azul de fondo
-                    contentColor = Color.White // Blanco para el texto
+                    containerColor = Color(0xFF003F5C),
+                    contentColor = Color.White
                 )
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.salir), // Logo de "Salir" (en azul)
+                    painter = painterResource(id = R.drawable.salir),
                     contentDescription = "Salir",
-                    modifier = Modifier.size(24.dp), // Tamaño del ícono
-                    tint = Color.White // Blanco para el ícono
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Salir", style = MaterialTheme.typography.bodyLarge.copy(color = Color.White))
             }
         }
 
-        // Mostrar el diálogo de confirmación cuando se presiona el botón "Salir"
-        if (showDialog) {
+        // Diálogo para salir
+        if (showExitDialog) {
             AlertDialog(
-                onDismissRequest = { showDialog = false },
+                onDismissRequest = { showExitDialog = false },
                 title = { Text("Confirmar salida") },
                 text = { Text("¿Estás seguro de que quieres salir de la aplicación?") },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            navController.navigate("login") // Navegar al login si se confirma
-                            showDialog = false
+                            navController.navigate("login")
+                            showExitDialog = false
                         }
                     ) {
                         Text("Sí")
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDialog = false }) {
+                    TextButton(onClick = { showExitDialog = false }) {
                         Text("No")
+                    }
+                }
+            )
+        }
+
+        // Diálogo para cambiar nombre
+        if (showNameDialog) {
+            AlertDialog(
+                onDismissRequest = { showNameDialog = false },
+                title = { Text("Cambiar nombre") },
+                text = {
+                    OutlinedTextField(
+                        value = nuevoNombre,
+                        onValueChange = { nuevoNombre = it },
+                        label = { Text("Nuevo nombre") },
+                        singleLine = true
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        nombreUsuario = nuevoNombre
+                        showNameDialog = false
+                    }) {
+                        Text("Guardar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showNameDialog = false }) {
+                        Text("Cancelar")
                     }
                 }
             )
         }
     }
 }
+
