@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.parchadosapp.data.PatchRepository
+import com.example.parchadosapp.ui.screens.BuscarScreen
 import com.example.parchadosapp.ui.screens.GoogleCalendarScreen
 import com.example.parchadosapp.ui.screens.HomeScreen
 import com.example.parchadosapp.ui.screens.LoginScreen
@@ -25,13 +26,13 @@ fun NavGraph(navController: NavHostController, context: Context) {
         composable("register") { RegisterScreen(navController) }
         composable("home") { HomeScreen(navController, context) }
         composable("map") {
-            MapScreen(navController, context, null)  // Aquí no pasas filtro, simplemente 'null'
+            MapScreen(navController, context, null)
         }
 
-// Ruta con filtro (cuando se hace clic en una card del carrusel)
+
         composable("map/{selectedSport}") { backStackEntry ->
             val selectedSport = backStackEntry.arguments?.getString("selectedSport")
-            MapScreen(navController, context, selectedSport)  // Aquí pasas el filtro
+            MapScreen(navController, context, selectedSport)
         }
         composable("parche") { ParcheScreen(navController, context) }
         composable("calendar") { GoogleCalendarScreen(navController) }
@@ -47,5 +48,10 @@ fun NavGraph(navController: NavHostController, context: Context) {
                 PatchDetailScreen(navController, patch)
             }
         }
+
+        composable("buscar") {
+            BuscarScreen(navController = navController, context = context)
+        }
+
     }
 }

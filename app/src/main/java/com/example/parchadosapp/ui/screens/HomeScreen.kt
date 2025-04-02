@@ -31,7 +31,7 @@ import com.example.parchadosapp.ui.theme.BrightRetro
 
 @Composable
 fun HomeScreen(navController: NavController, context: Context) {
-    // Lista de parches
+
     val patches = PatchRepository.patches
 
     Box(
@@ -45,7 +45,7 @@ fun HomeScreen(navController: NavController, context: Context) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            // 🔹 Sección superior (Perfil + Título + Notificaciones)
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -102,12 +102,12 @@ fun HomeScreen(navController: NavController, context: Context) {
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // 🔹 Carrusel de deportes
+
             SportsCarousel(navController = navController)
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // 🔹 Lista de parches disponibles
+
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()

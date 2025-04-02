@@ -60,12 +60,20 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
             NavigationBarItem(
                 icon = { IconWithBackground(R.drawable.ic_find_game, isSelected = selectedItem == "buscar") },
                 selected = selectedItem == "buscar",
-                onClick = { selectedItem = "buscar" }
+                onClick = {
+                    if (selectedItem != "buscar") {
+                        selectedItem = "buscar"
+                        navController.navigate("buscar") {
+                            popUpTo("buscar") { inclusive = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
             )
 
-            Spacer(modifier = Modifier.width(50.dp)) // Espacio para el botón flotante
+            Spacer(modifier = Modifier.width(50.dp))
 
-            // Botón para el calendario
             NavigationBarItem(
                 icon = { IconWithBackground(R.drawable.calendar, isSelected = selectedItem == "calendar") },
                 selected = selectedItem == "calendar",
@@ -98,7 +106,7 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
         }
 
 
-        // Botón flotante "P"
+
         Box(
             modifier = Modifier
                 .offset(y = (-28).dp)
@@ -134,23 +142,20 @@ fun BottomNavigationBar(navController: NavController, modifier: Modifier = Modif
 }
 
 
-/**
- * 🔹 Componente para los íconos con fondo y bordeado
- */
 @Composable
 fun IconWithBackground(iconId: Int, isSelected: Boolean) {
     Box(
         modifier = Modifier
-            .size(50.dp) // 🔹 Ícono más grande
+            .size(50.dp)
             .clip(CircleShape)
-            .background(if (isSelected) PrimaryColor else Color(0xFFE0E0E0)), // Cambia color al seleccionar
+            .background(if (isSelected) PrimaryColor else Color(0xFFE0E0E0)),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             painter = painterResource(id = iconId),
             contentDescription = null,
             tint = if (isSelected) Color.White else Color.Gray,
-            modifier = Modifier.size(35.dp) // 🔹 Ícono más grande
+            modifier = Modifier.size(35.dp)
         )
     }
 }
