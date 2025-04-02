@@ -39,8 +39,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import android.content.Context
+import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import com.example.parchadosapp.R
 import com.google.api.services.calendar.model.CalendarListEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -56,17 +58,29 @@ fun GoogleCalendarScreen(navController: NavController) {
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    createSampleEventInParchadosCalendar(context, lifecycle.lifecycleScope) // 👈 Usa calendario de Parchados
-                },
-                containerColor = Color(0xFF003F5C),
-                shape = RoundedCornerShape(12.dp)
+            Box(
+                modifier = Modifier
+                    .size(60.dp) // ajusta el tamaño total del contenedor
+                    .padding(4.dp)
             ) {
-                Text("+", color = Color.White, fontSize = 28.sp)
+                IconButton(
+                    onClick = {
+                        createSampleEventInParchadosCalendar(context, lifecycle.lifecycleScope)
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.googlecalendar),
+                        contentDescription = "Agregar evento",
+                        tint = Color.Unspecified, // ✅ importante para que NO aplique ningún color
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
             }
         }
-    ) { paddingValues ->
+    )
+
+    { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -79,11 +93,11 @@ fun GoogleCalendarScreen(navController: NavController) {
                     .padding(horizontal = 16.dp, vertical = 10.dp)
             ) {
                 Text(
-                    text = "📆 Tus eventos de Parchados",
-                    fontSize = 28.sp,
+                    text = "Tus eventos 📆 ",
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF003F5C),
-                    modifier = Modifier.padding(vertical = 12.dp)
+                    modifier = Modifier.padding(vertical = 16.dp)
                 )
 
                 if (events.isEmpty()) {
@@ -113,10 +127,12 @@ fun GoogleCalendarScreen(navController: NavController) {
         }
     }
 
-    // ✅ Lógica para cargar eventos desde calendario "ParchadosApp"
     LaunchedEffect(Unit) {
-        val fetchedEvents = fetchEventsFromParchadosCalendar(context)
-        events = fetchedEvents
+        while (true) {
+            val fetchedEvents = fetchEventsFromParchadosCalendar(context)
+            events = fetchedEvents
+            kotlinx.coroutines.delay(10_000)
+        }
     }
 }
 
