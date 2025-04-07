@@ -44,7 +44,6 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var time by remember { mutableStateOf("") }
 
     val localContext = LocalContext.current
-
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(4.60971, -74.08175), 12f)
     }
@@ -53,28 +52,35 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var selectedPatch by remember { mutableStateOf<Patch?>(null) }
 
     Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
+        bottomBar = { BottomNavigationBar(navController) },
+        containerColor = BackgroundColor
     ) { paddingValues ->
-        Box(
+
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+
+            // Contenido scrollable (campos de texto y etiquetas)
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .weight(1f)
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
+                    .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Crear un Parche",
-                    fontSize = 24.sp,
-                    fontFamily = BowlbyOneSC,
-                    color = Color.White
-                )
 
                 Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Crear un Parche",
+                    fontSize = 26.sp,
+                    fontFamily = BowlbyOneSC,
+                    color = PrimaryColor
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 CustomTextField(
                     value = parcheName,
@@ -83,17 +89,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     icon = Icons.Default.Call
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
-
-                CustomTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = "Dirección",
-                    icon = Icons.Default.LocationOn,
-                    readOnly = true
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 CustomTextField(
                     value = playersNeeded,
@@ -102,15 +98,13 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     icon = Icons.Default.AccountCircle
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Fecha con selector
                 OutlinedTextField(
                     value = date,
                     onValueChange = {},
-                    label = { Text("Fecha", color = Color.Black) },
-                    modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
+                    label = { Text("Fecha") },
                     trailingIcon = {
                         IconButton(onClick = {
                             showParcheDatePicker(localContext) { date = it }
@@ -118,22 +112,24 @@ fun ParcheScreen(navController: NavController, context: Context) {
                             Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
                         }
                     },
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = Color.Black,
-                        cursorColor = Color.Black
+                        textColor = TextColor,
+                        cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = SecondaryColor,
+                        containerColor = White
                     )
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Hora con selector
                 OutlinedTextField(
                     value = time,
                     onValueChange = {},
-                    label = { Text("Hora", color = Color.Black) },
-                    modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
+                    label = { Text("Hora") },
                     trailingIcon = {
                         IconButton(onClick = {
                             showParcheTimePicker(localContext) { time = it }
@@ -141,64 +137,86 @@ fun ParcheScreen(navController: NavController, context: Context) {
                             Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar hora")
                         }
                     },
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = Color.Black,
-                        cursorColor = Color.Black
+                        textColor = TextColor,
+                        cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = SecondaryColor,
+                        containerColor = White
                     )
                 )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Campo de dirección (moved here)
+                CustomTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = "Dirección",
+                    icon = Icons.Default.LocationOn,
+                    readOnly = true
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
                     text = "Selecciona el lugar del parche:",
-                    color = Color.White,
+                    color = TextColor,
                     fontSize = 16.sp
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
-                Box(
-                    modifier = Modifier
-                        .height(200.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                ) {
-                    GoogleMap(cameraPositionState = cameraPositionState) {
-                        patches.forEach { patch ->
-                            Marker(
-                                state = MarkerState(position = LatLng(patch.latitude, patch.longitude)),
-                                title = patch.name,
-                                snippet = patch.address,
-                                icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
-                                onClick = {
-                                    selectedPatch = patch
-                                    description = patch.address
-                                    true
-                                }
-                            )
-                        }
+            // Mapa fuera del scroll
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .padding(horizontal = 20.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(DetailColor)
+            ) {
+                GoogleMap(cameraPositionState = cameraPositionState) {
+                    patches.forEach { patch ->
+                        Marker(
+                            state = MarkerState(position = LatLng(patch.latitude, patch.longitude)),
+                            title = patch.name,
+                            snippet = patch.address,
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
+                            onClick = {
+                                selectedPatch = patch
+                                description = patch.address
+                                true
+                            }
+                        )
                     }
                 }
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
+            // Botón fuera del scroll también
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .padding(vertical = 16.dp)
+            ) {
                 Button(
                     onClick = {
-                        // Acción para guardar el parche con fecha y hora
+                        // Acción para guardar el parche
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryColor),
+                    colors = ButtonDefaults.buttonColors(containerColor = AccentColor),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text(text = "Crear Parche", fontSize = 18.sp, color = Color.White)
+                    Text(text = "Crear Parche", fontSize = 18.sp, color = Black)
                 }
-
-                Spacer(modifier = Modifier.height(80.dp))
             }
         }
     }
 }
+
 
 // ✅ CustomTextField reutilizable
 @OptIn(ExperimentalMaterial3Api::class)
