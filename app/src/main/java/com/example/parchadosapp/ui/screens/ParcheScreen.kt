@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.LocationOn
@@ -52,6 +53,8 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var playersNeeded by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+
 
     var marcadorSeleccionado by remember { mutableStateOf<String?>(null) }
 
@@ -176,13 +179,62 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Campo: Nombre del lugar
-                CustomTextField(
-                    value = nombreLugar,
-                    onValueChange = { nombreLugar = it },
-                    label = "Nombre del Lugar",
-                    icon = Icons.Default.Call,
-                    readOnly = true
-                )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = nombreLugar,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Nombre del Lugar") },
+                        trailingIcon = {
+                            IconButton(onClick = { expanded = !expanded }) {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = TextColor,
+                            cursorColor = PrimaryColor,
+                            focusedBorderColor = PrimaryColor,
+                            unfocusedBorderColor = SecondaryColor,
+                            containerColor = White
+                        )
+                    )
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(White)
+                    ) {
+                        lugares.forEach { (lugar, coords) ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        text = lugar.nombre,
+                                        color = Color.Black // 👈 texto visible
+                                    )
+                                },
+                                onClick = {
+                                    nombreLugar = lugar.nombre
+                                    description = lugar.direccion
+                                    marcadorSeleccionado = lugar.id
+                                    expanded = false
+
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        cameraPositionState.animate(
+                                            update = CameraUpdateFactory.newLatLngZoom(coords, 15f),
+                                            durationMs = 800
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+
 
                 Spacer(modifier = Modifier.height(12.dp))
 
