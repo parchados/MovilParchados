@@ -38,16 +38,22 @@ import com.example.parchadosapp.data.models.Lugar
 import com.example.parchadosapp.utils.geocodeDireccion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.google.android.gms.maps.CameraUpdateFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ParcheScreen(navController: NavController, context: Context) {
     var parcheName by remember { mutableStateOf("") }
+    var nombreLugar by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var playersNeeded by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
+
+    var marcadorSeleccionado by remember { mutableStateOf<String?>(null) }
 
     val localContext = LocalContext.current
     val cameraPositionState = rememberCameraPositionState {
@@ -56,7 +62,6 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
     var lugares by remember { mutableStateOf<List<Pair<Lugar, LatLng>>>(emptyList()) }
 
-    // Cargar lugares desde Supabase y geocodificarlos
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
             try {
@@ -83,7 +88,6 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 .padding(paddingValues)
         ) {
 
-            // Contenido scrollable
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -171,9 +175,21 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // Campo: Nombre del lugar
+                CustomTextField(
+                    value = nombreLugar,
+                    onValueChange = { nombreLugar = it },
+                    label = "Nombre del Lugar",
+                    icon = Icons.Default.Call,
+                    readOnly = true
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Campo: Dirección
                 CustomTextField(
                     value = description,
-                    onValueChange = { description = it },
+                    onValueChange = {},
                     label = "Dirección",
                     icon = Icons.Default.LocationOn,
                     readOnly = true
@@ -190,7 +206,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Mapa con lugares dinámicos
+            // Mapa
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -205,9 +221,22 @@ fun ParcheScreen(navController: NavController, context: Context) {
                             state = MarkerState(position = coords),
                             title = lugar.nombre,
                             snippet = lugar.direccion,
-                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
+                            icon = if (marcadorSeleccionado == lugar.id)
+                                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)
+                            else
+                                BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
                             onClick = {
                                 description = lugar.direccion
+                                nombreLugar = lugar.nombre
+                                marcadorSeleccionado = lugar.id
+
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    cameraPositionState.animate(
+                                        update = CameraUpdateFactory.newLatLngZoom(coords, 15f),
+                                        durationMs = 800
+                                    )
+                                }
+
                                 true
                             }
                         )
@@ -215,7 +244,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 }
             }
 
-            // Botón Crear Parche
+            // Botón
             Column(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -235,6 +264,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
         }
     }
 }
+
 
 
 
