@@ -33,6 +33,12 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import java.util.*
+import com.example.parchadosapp.data.api.obtenerLugares
+import com.example.parchadosapp.data.models.Lugar
+import com.example.parchadosapp.utils.geocodeDireccion
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,8 +54,23 @@ fun ParcheScreen(navController: NavController, context: Context) {
         position = CameraPosition.fromLatLngZoom(LatLng(4.60971, -74.08175), 12f)
     }
 
-    val patches = PatchRepository.patches
-    var selectedPatch by remember { mutableStateOf<Patch?>(null) }
+    var lugares by remember { mutableStateOf<List<Pair<Lugar, LatLng>>>(emptyList()) }
+
+    // Cargar lugares desde Supabase y geocodificarlos
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            try {
+                val fetched = obtenerLugares()
+                val geo = fetched.mapNotNull { lugar ->
+                    val coords = geocodeDireccion(context, lugar.direccion)
+                    coords?.let { lugar to it }
+                }
+                lugares = geo
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) },
@@ -62,7 +83,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 .padding(paddingValues)
         ) {
 
-            // Contenido scrollable (campos de texto y etiquetas)
+            // Contenido scrollable
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -150,7 +171,6 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Campo de dirección (moved here)
                 CustomTextField(
                     value = description,
                     onValueChange = { description = it },
@@ -170,7 +190,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Mapa fuera del scroll
+            // Mapa con lugares dinámicos
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -180,15 +200,14 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     .background(DetailColor)
             ) {
                 GoogleMap(cameraPositionState = cameraPositionState) {
-                    patches.forEach { patch ->
+                    lugares.forEach { (lugar, coords) ->
                         Marker(
-                            state = MarkerState(position = LatLng(patch.latitude, patch.longitude)),
-                            title = patch.name,
-                            snippet = patch.address,
+                            state = MarkerState(position = coords),
+                            title = lugar.nombre,
+                            snippet = lugar.direccion,
                             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
                             onClick = {
-                                selectedPatch = patch
-                                description = patch.address
+                                description = lugar.direccion
                                 true
                             }
                         )
@@ -196,7 +215,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 }
             }
 
-            // Botón fuera del scroll también
+            // Botón Crear Parche
             Column(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -216,6 +235,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
         }
     }
 }
+
 
 
 // ✅ CustomTextField reutilizable

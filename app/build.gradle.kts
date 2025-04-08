@@ -114,5 +114,10 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.3")
     implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.3")
     implementation("io.github.jan-tennert.supabase:supabase-kt:2.0.3")
+    implementation("io.ktor:ktor-client-okhttp:2.3.4")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.4")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.4")
+
+
 
 }
