@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0"
 }
 
 android {
@@ -108,5 +109,10 @@ dependencies {
         exclude(group = "com.android.support", module = "support-compat")
         exclude(group = "com.android.support", module = "support-fragment")
     }
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.3")
+    implementation("io.github.jan-tennert.supabase:realtime-kt:2.0.3")
+    implementation("io.github.jan-tennert.supabase:supabase-kt:2.0.3")
 
 }
