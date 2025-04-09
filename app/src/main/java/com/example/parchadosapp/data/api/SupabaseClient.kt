@@ -1,5 +1,6 @@
 package com.example.parchadosapp.data.api
 
+import com.example.parchadosapp.data.models.Espacio
 import com.example.parchadosapp.data.models.Lugar
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -7,6 +8,12 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.serialization.json.Json
+
+
+
+
+
+
 
 val supabase: SupabaseClient = createSupabaseClient(
     supabaseUrl = "https://giynykejishwdmsgshag.supabase.co",
@@ -25,3 +32,15 @@ val supabase: SupabaseClient = createSupabaseClient(
 suspend fun obtenerLugares(): List<Lugar> {
     return supabase.from("lugares").select().decodeList()
 }
+
+
+suspend fun obtenerEspaciosPorLugar(lugarId: String): List<Espacio> {
+    return supabase.from("espacios")
+        .select {
+            filter {
+                eq("lugar_id", lugarId)
+            }
+        }
+        .decodeList()
+}
+

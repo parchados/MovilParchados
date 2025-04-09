@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.data.PatchRepository
+import com.example.parchadosapp.data.api.obtenerEspaciosPorLugar
 import com.example.parchadosapp.ui.components.BottomNavigationBar
 import com.example.parchadosapp.ui.components.Patch
 import com.example.parchadosapp.ui.theme.*
@@ -35,6 +36,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 import java.util.*
 import com.example.parchadosapp.data.api.obtenerLugares
+import com.example.parchadosapp.data.models.Espacio
 import com.example.parchadosapp.data.models.Lugar
 import com.example.parchadosapp.utils.geocodeDireccion
 import kotlinx.coroutines.Dispatchers
@@ -53,6 +55,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var parcheName by remember { mutableStateOf("") }
     var nombreLugar by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var nombreEspacio by remember { mutableStateOf("") }
     var playersNeeded by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
@@ -62,6 +65,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var selectedSport by remember { mutableStateOf("") }
     var expandedSport by remember { mutableStateOf(false) }
     var expandedLugar by remember { mutableStateOf(false) }
+    var expandedEspacio by remember { mutableStateOf(false) }
 
     var marcadorSeleccionado by remember { mutableStateOf<String?>(null) }
 
@@ -71,6 +75,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
     }
 
     var lugares by remember { mutableStateOf<List<Pair<Lugar, LatLng>>>(emptyList()) }
+    var espacios by remember { mutableStateOf<List<Espacio>>(emptyList()) }
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
@@ -91,7 +96,6 @@ fun ParcheScreen(navController: NavController, context: Context) {
         bottomBar = { BottomNavigationBar(navController) },
         containerColor = BackgroundColor
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -115,96 +119,68 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                CustomTextField(
-                    value = parcheName,
-                    onValueChange = { parcheName = it },
-                    label = "Nombre del Parche",
-                    icon = Icons.Default.Call
-                )
-
+                CustomTextField(parcheName, { parcheName = it }, "Nombre del Parche", Icons.Default.Call)
+                Spacer(modifier = Modifier.height(12.dp))
+                CustomTextField(playersNeeded, { playersNeeded = it }, "N° de Jugadores", Icons.Default.AccountCircle)
                 Spacer(modifier = Modifier.height(12.dp))
 
-                CustomTextField(
-                    value = playersNeeded,
-                    onValueChange = { playersNeeded = it },
-                    label = "N° de Jugadores",
-                    icon = Icons.Default.AccountCircle
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Fecha
                 OutlinedTextField(
                     value = date,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Fecha") },
                     trailingIcon = {
-                        IconButton(onClick = {
-                            showParcheDatePicker(localContext) { date = it }
-                        }) {
-                            Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
+                        IconButton(onClick = { showParcheDatePicker(localContext) { date = it } }) {
+                            Icon(imageVector = Icons.Default.DateRange, contentDescription = null)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = TextColor,
-                        cursorColor = PrimaryColor,
-                        focusedBorderColor = PrimaryColor,
-                        unfocusedBorderColor = SecondaryColor,
+                        textColor = TextColor, cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor, unfocusedBorderColor = SecondaryColor,
                         containerColor = White
                     )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Hora inicio
                 OutlinedTextField(
                     value = time,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Hora Inicio") },
                     trailingIcon = {
-                        IconButton(onClick = {
-                            showParcheTimePicker(localContext) { time = it }
-                        }) {
-                            Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar hora")
+                        IconButton(onClick = { showParcheTimePicker(localContext) { time = it } }) {
+                            Icon(Icons.Default.DateRange, contentDescription = null)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = TextColor,
-                        cursorColor = PrimaryColor,
-                        focusedBorderColor = PrimaryColor,
-                        unfocusedBorderColor = SecondaryColor,
+                        textColor = TextColor, cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor, unfocusedBorderColor = SecondaryColor,
                         containerColor = White
                     )
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Hora fin
                 OutlinedTextField(
                     value = horaFin,
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Hora Fin") },
                     trailingIcon = {
-                        IconButton(onClick = {
-                            showParcheTimePicker(localContext) { horaFin = it }
-                        }) {
-                            Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar hora fin")
+                        IconButton(onClick = { showParcheTimePicker(localContext) { horaFin = it } }) {
+                            Icon(Icons.Default.DateRange, contentDescription = null)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = TextColor,
-                        cursorColor = PrimaryColor,
-                        focusedBorderColor = PrimaryColor,
-                        unfocusedBorderColor = SecondaryColor,
+                        textColor = TextColor, cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor, unfocusedBorderColor = SecondaryColor,
                         containerColor = White
                     )
                 )
@@ -226,10 +202,8 @@ fun ParcheScreen(navController: NavController, context: Context) {
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = TextColor,
-                            cursorColor = PrimaryColor,
-                            focusedBorderColor = PrimaryColor,
-                            unfocusedBorderColor = SecondaryColor,
+                            textColor = TextColor, cursorColor = PrimaryColor,
+                            focusedBorderColor = PrimaryColor, unfocusedBorderColor = SecondaryColor,
                             containerColor = White
                         )
                     )
@@ -237,9 +211,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     DropdownMenu(
                         expanded = expandedSport,
                         onDismissRequest = { expandedSport = false },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(White)
+                        modifier = Modifier.fillMaxWidth().background(White)
                     ) {
                         listOf("Fútbol", "Baloncesto", "Tenis", "Voleibol", "Ultimate", "Otro").forEach { deporte ->
                             DropdownMenuItem(
@@ -270,10 +242,8 @@ fun ParcheScreen(navController: NavController, context: Context) {
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = TextColor,
-                            cursorColor = PrimaryColor,
-                            focusedBorderColor = PrimaryColor,
-                            unfocusedBorderColor = SecondaryColor,
+                            textColor = TextColor, cursorColor = PrimaryColor,
+                            focusedBorderColor = PrimaryColor, unfocusedBorderColor = SecondaryColor,
                             containerColor = White
                         )
                     )
@@ -281,13 +251,11 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     DropdownMenu(
                         expanded = expandedLugar,
                         onDismissRequest = { expandedLugar = false },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(White)
+                        modifier = Modifier.fillMaxWidth().background(White)
                     ) {
                         lugares.forEach { (lugar, coords) ->
                             DropdownMenuItem(
-                                text = { Text(text = lugar.nombre, color = Color.Black) },
+                                text = { Text(lugar.nombre, color = Color.Black) },
                                 onClick = {
                                     nombreLugar = lugar.nombre
                                     description = lugar.direccion
@@ -300,6 +268,58 @@ fun ParcheScreen(navController: NavController, context: Context) {
                                             durationMs = 800
                                         )
                                     }
+
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        val fetchedEspacios = obtenerEspaciosPorLugar(lugar.id)
+                                        withContext(Dispatchers.Main) {
+                                            espacios = fetchedEspacios
+                                            nombreEspacio = ""
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Selector de espacio
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = nombreEspacio,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Espacio") },
+                        trailingIcon = {
+                            IconButton(onClick = { if (espacios.isNotEmpty()) expandedEspacio = !expandedEspacio }) {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        enabled = espacios.isNotEmpty(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = TextColor,
+                            containerColor = White,
+                            focusedBorderColor = PrimaryColor,
+                            unfocusedBorderColor = SecondaryColor,
+                            disabledTextColor = Color.Gray,
+                            disabledBorderColor = SecondaryColor
+                        )
+                    )
+
+                    DropdownMenu(
+                        expanded = expandedEspacio,
+                        onDismissRequest = { expandedEspacio = false },
+                        modifier = Modifier.fillMaxWidth().background(White)
+                    ) {
+                        espacios.forEach { espacio ->
+                            DropdownMenuItem(
+                                text = { Text(espacio.nombre, color = Color.Black) },
+                                onClick = {
+                                    nombreEspacio = espacio.nombre
+                                    expandedEspacio = false
                                 }
                             )
                         }
@@ -309,14 +329,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Dirección
-                CustomTextField(
-                    value = description,
-                    onValueChange = {},
-                    label = "Dirección",
-                    icon = Icons.Default.LocationOn,
-                    readOnly = true
-                )
-
+                CustomTextField(description, {}, "Dirección", Icons.Default.LocationOn, readOnly = true)
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Descripción del parche
@@ -324,15 +337,11 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     value = descripcionParche,
                     onValueChange = { descripcionParche = it },
                     label = { Text("Descripción del Parche") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp),
+                    modifier = Modifier.fillMaxWidth().height(120.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = TextColor,
-                        cursorColor = PrimaryColor,
-                        focusedBorderColor = PrimaryColor,
-                        unfocusedBorderColor = SecondaryColor,
+                        textColor = TextColor, cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor, unfocusedBorderColor = SecondaryColor,
                         containerColor = White
                     )
                 )
@@ -348,14 +357,9 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Mapa
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(horizontal = 20.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(DetailColor)
+                modifier = Modifier.fillMaxWidth().height(200.dp)
+                    .padding(horizontal = 20.dp).clip(RoundedCornerShape(10.dp)).background(DetailColor)
             ) {
                 GoogleMap(cameraPositionState = cameraPositionState) {
                     lugares.forEach { (lugar, coords) ->
@@ -368,8 +372,8 @@ fun ParcheScreen(navController: NavController, context: Context) {
                             else
                                 BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
                             onClick = {
-                                description = lugar.direccion
                                 nombreLugar = lugar.nombre
+                                description = lugar.direccion
                                 marcadorSeleccionado = lugar.id
 
                                 CoroutineScope(Dispatchers.Main).launch {
@@ -379,6 +383,14 @@ fun ParcheScreen(navController: NavController, context: Context) {
                                     )
                                 }
 
+                                CoroutineScope(Dispatchers.IO).launch {
+                                    val fetchedEspacios = obtenerEspaciosPorLugar(lugar.id)
+                                    withContext(Dispatchers.Main) {
+                                        espacios = fetchedEspacios
+                                        nombreEspacio = ""
+                                    }
+                                }
+
                                 true
                             }
                         )
@@ -386,15 +398,12 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 }
             }
 
-            // Botón crear
             Column(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .padding(vertical = 16.dp)
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
                 Button(
                     onClick = {
-                        // TODO: lógica para crear el parche
+                        // Lógica para crear el parche
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = AccentColor),
@@ -406,6 +415,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
         }
     }
 }
+
 
 
 
