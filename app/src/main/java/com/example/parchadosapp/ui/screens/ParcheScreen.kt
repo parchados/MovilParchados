@@ -42,6 +42,9 @@ import kotlinx.coroutines.withContext
 import com.google.android.gms.maps.CameraUpdateFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +57,13 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+    val encodedNombre = URLEncoder.encode(parcheName.trim(), StandardCharsets.UTF_8.toString())
+    val encodedJugadores = URLEncoder.encode(playersNeeded.trim(), StandardCharsets.UTF_8.toString())
+    val encodedFecha = URLEncoder.encode(date.trim(), StandardCharsets.UTF_8.toString())
+    val encodedHora = URLEncoder.encode(time.trim(), StandardCharsets.UTF_8.toString())
+    val encodedNombreLugar = URLEncoder.encode(nombreLugar.trim(), StandardCharsets.UTF_8.toString())
+    val encodedDireccion = URLEncoder.encode(description.trim(), StandardCharsets.UTF_8.toString())
+
 
 
     var marcadorSeleccionado by remember { mutableStateOf<String?>(null) }
@@ -304,13 +314,15 @@ fun ParcheScreen(navController: NavController, context: Context) {
             ) {
                 Button(
                     onClick = {
-                        // Acción para guardar el parche
+                        navController.navigate(
+                            "crear_parche_detalles/$encodedNombre/$encodedJugadores/$encodedFecha/$encodedHora/$encodedNombreLugar/$encodedDireccion"
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = AccentColor),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text(text = "Crear Parche", fontSize = 18.sp, color = Black)
+                    Text(text = "Continuar", fontSize = 18.sp, color = Black)
                 }
             }
         }
