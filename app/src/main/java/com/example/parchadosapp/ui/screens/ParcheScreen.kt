@@ -3,6 +3,7 @@ package com.example.parchadosapp.ui.screens
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.data.PatchRepository
+import com.example.parchadosapp.data.api.crearParche
 import com.example.parchadosapp.data.api.obtenerEspaciosPorLugar
 import com.example.parchadosapp.ui.components.BottomNavigationBar
 import com.example.parchadosapp.ui.components.Patch
@@ -38,6 +40,7 @@ import java.util.*
 import com.example.parchadosapp.data.api.obtenerLugares
 import com.example.parchadosapp.data.models.Espacio
 import com.example.parchadosapp.data.models.Lugar
+import com.example.parchadosapp.data.models.ParcheRequest
 import com.example.parchadosapp.utils.geocodeDireccion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -46,6 +49,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import android.util.Log
+import java.time.LocalTime
+
+
 
 
 
@@ -76,6 +83,8 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
     var lugares by remember { mutableStateOf<List<Pair<Lugar, LatLng>>>(emptyList()) }
     var espacios by remember { mutableStateOf<List<Espacio>>(emptyList()) }
+    var espacioSeleccionadoId by remember { mutableStateOf<String?>(null) }
+
 
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
@@ -319,6 +328,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                                 text = { Text(espacio.nombre, color = Color.Black) },
                                 onClick = {
                                     nombreEspacio = espacio.nombre
+                                    espacioSeleccionadoId = espacio.id // ✅ Guardamos el ID aquí
                                     expandedEspacio = false
                                 }
                             )
@@ -403,8 +413,53 @@ fun ParcheScreen(navController: NavController, context: Context) {
             ) {
                 Button(
                     onClick = {
-                        // Lógica para crear el parche
-                    },
+                        if (espacioSeleccionadoId != null) {
+                            val horaInicioParsed = LocalTime.parse(time)
+                            val horaFinParsed = LocalTime.parse(horaFin)
+
+                            if (horaFinParsed <= horaInicioParsed) {
+                                Toast.makeText(context, "La hora fin debe ser mayor a la hora inicio", Toast.LENGTH_LONG).show()
+                                return@Button
+                            }
+
+                            val cupo = playersNeeded.toIntOrNull() ?: 0
+                            if (cupo <= 0) {
+                                Toast.makeText(context, "Cupo debe ser mayor a 0", Toast.LENGTH_LONG).show()
+                                return@Button
+                            }
+
+                            val parcheRequest = ParcheRequest(
+                                espacio_id = espacioSeleccionadoId!!,
+                                creador_id = "aaaaaaaa-9999-0000-0000-000000000000", // fijo
+                                nombre = parcheName,
+                                descripcion = descripcionParche,
+                                fecha = date,
+                                hora_inicio = time,
+                                hora_fin = horaFin,
+                                cupo_maximo = cupo,
+                                estado = "Activo",
+                                deporte = selectedSport
+                            )
+
+                            Log.d("ParcheDebug", parcheRequest.toString()) // para revisar valores
+
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val creado = crearParche(parcheRequest)
+                                withContext(Dispatchers.Main) {
+                                    if (creado) {
+                                        Toast.makeText(context, "Parche creado exitosamente", Toast.LENGTH_LONG).show()
+                                        navController.popBackStack()
+                                    } else {
+                                        Toast.makeText(context, "Error al crear el parche", Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            }
+                        } else {
+                            Toast.makeText(context, "Selecciona un espacio válido", Toast.LENGTH_LONG).show()
+                        }
+
+                    }
+                    ,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = AccentColor),
                     shape = RoundedCornerShape(10.dp)

@@ -2,6 +2,7 @@ package com.example.parchadosapp.data.api
 
 import com.example.parchadosapp.data.models.Espacio
 import com.example.parchadosapp.data.models.Lugar
+import com.example.parchadosapp.data.models.ParcheRequest
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -43,4 +44,18 @@ suspend fun obtenerEspaciosPorLugar(lugarId: String): List<Espacio> {
         }
         .decodeList()
 }
+
+
+suspend fun crearParche(parche: ParcheRequest): Boolean {
+    return try {
+        supabase.from("parches").insert(parche)
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+
+
 
