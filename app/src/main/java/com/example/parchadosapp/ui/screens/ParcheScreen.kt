@@ -56,15 +56,12 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var playersNeeded by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var time by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
-    val encodedNombre = URLEncoder.encode(parcheName.trim(), StandardCharsets.UTF_8.toString())
-    val encodedJugadores = URLEncoder.encode(playersNeeded.trim(), StandardCharsets.UTF_8.toString())
-    val encodedFecha = URLEncoder.encode(date.trim(), StandardCharsets.UTF_8.toString())
-    val encodedHora = URLEncoder.encode(time.trim(), StandardCharsets.UTF_8.toString())
-    val encodedNombreLugar = URLEncoder.encode(nombreLugar.trim(), StandardCharsets.UTF_8.toString())
-    val encodedDireccion = URLEncoder.encode(description.trim(), StandardCharsets.UTF_8.toString())
+    var horaFin by remember { mutableStateOf("") }
+    var descripcionParche by remember { mutableStateOf("") }
 
-
+    var selectedSport by remember { mutableStateOf("") }
+    var expandedSport by remember { mutableStateOf(false) }
+    var expandedLugar by remember { mutableStateOf(false) }
 
     var marcadorSeleccionado by remember { mutableStateOf<String?>(null) }
 
@@ -100,7 +97,6 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -108,7 +104,6 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
@@ -138,6 +133,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // Fecha
                 OutlinedTextField(
                     value = date,
                     onValueChange = {},
@@ -163,11 +159,12 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                // Hora inicio
                 OutlinedTextField(
                     value = time,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Hora") },
+                    label = { Text("Hora Inicio") },
                     trailingIcon = {
                         IconButton(onClick = {
                             showParcheTimePicker(localContext) { time = it }
@@ -188,15 +185,41 @@ fun ParcheScreen(navController: NavController, context: Context) {
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Campo: Nombre del lugar
+                // Hora fin
+                OutlinedTextField(
+                    value = horaFin,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Hora Fin") },
+                    trailingIcon = {
+                        IconButton(onClick = {
+                            showParcheTimePicker(localContext) { horaFin = it }
+                        }) {
+                            Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar hora fin")
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = TextColor,
+                        cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = SecondaryColor,
+                        containerColor = White
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Selector de deporte
                 Box(modifier = Modifier.fillMaxWidth()) {
                     OutlinedTextField(
-                        value = nombreLugar,
+                        value = selectedSport,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Nombre del Lugar") },
+                        label = { Text("Deporte") },
                         trailingIcon = {
-                            IconButton(onClick = { expanded = !expanded }) {
+                            IconButton(onClick = { expandedSport = !expandedSport }) {
                                 Icon(Icons.Default.ArrowDropDown, contentDescription = null)
                             }
                         },
@@ -212,25 +235,64 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     )
 
                     DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
+                        expanded = expandedSport,
+                        onDismissRequest = { expandedSport = false },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(White)
+                    ) {
+                        listOf("Fútbol", "Baloncesto", "Tenis", "Voleibol", "Ultimate", "Otro").forEach { deporte ->
+                            DropdownMenuItem(
+                                text = { Text(deporte, color = Color.Black) },
+                                onClick = {
+                                    selectedSport = deporte
+                                    expandedSport = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Nombre del lugar
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = nombreLugar,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Nombre del Lugar") },
+                        trailingIcon = {
+                            IconButton(onClick = { expandedLugar = !expandedLugar }) {
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            textColor = TextColor,
+                            cursorColor = PrimaryColor,
+                            focusedBorderColor = PrimaryColor,
+                            unfocusedBorderColor = SecondaryColor,
+                            containerColor = White
+                        )
+                    )
+
+                    DropdownMenu(
+                        expanded = expandedLugar,
+                        onDismissRequest = { expandedLugar = false },
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(White)
                     ) {
                         lugares.forEach { (lugar, coords) ->
                             DropdownMenuItem(
-                                text = {
-                                    Text(
-                                        text = lugar.nombre,
-                                        color = Color.Black // 👈 texto visible
-                                    )
-                                },
+                                text = { Text(text = lugar.nombre, color = Color.Black) },
                                 onClick = {
                                     nombreLugar = lugar.nombre
                                     description = lugar.direccion
                                     marcadorSeleccionado = lugar.id
-                                    expanded = false
+                                    expandedLugar = false
 
                                     CoroutineScope(Dispatchers.Main).launch {
                                         cameraPositionState.animate(
@@ -244,17 +306,35 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     }
                 }
 
-
-
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Campo: Dirección
+                // Dirección
                 CustomTextField(
                     value = description,
                     onValueChange = {},
                     label = "Dirección",
                     icon = Icons.Default.LocationOn,
                     readOnly = true
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Descripción del parche
+                OutlinedTextField(
+                    value = descripcionParche,
+                    onValueChange = { descripcionParche = it },
+                    label = { Text("Descripción del Parche") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        textColor = TextColor,
+                        cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = SecondaryColor,
+                        containerColor = White
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -306,7 +386,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                 }
             }
 
-            // Botón
+            // Botón crear
             Column(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -314,20 +394,19 @@ fun ParcheScreen(navController: NavController, context: Context) {
             ) {
                 Button(
                     onClick = {
-                        navController.navigate(
-                            "crear_parche_detalles/$encodedNombre/$encodedJugadores/$encodedFecha/$encodedHora/$encodedNombreLugar/$encodedDireccion"
-                        )
+                        // TODO: lógica para crear el parche
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = AccentColor),
                     shape = RoundedCornerShape(10.dp)
                 ) {
-                    Text(text = "Continuar", fontSize = 18.sp, color = Black)
+                    Text(text = "Crear Parche", fontSize = 18.sp, color = Black)
                 }
             }
         }
     }
 }
+
 
 
 
