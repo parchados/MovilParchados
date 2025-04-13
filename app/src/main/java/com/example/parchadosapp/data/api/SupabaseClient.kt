@@ -10,13 +10,7 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.serialization.json.Json
 import com.example.parchadosapp.data.models.ParcheConImagen
-
-
-
-
-
-
-
+import com.example.parchadosapp.data.models.Persona
 
 val supabase: SupabaseClient = createSupabaseClient(
     supabaseUrl = "https://giynykejishwdmsgshag.supabase.co",
@@ -62,14 +56,6 @@ suspend fun obtenerParches(): List<ParcheRequest> {
     return supabase.from("parches").select().decodeList()
 }
 
-suspend fun obtenerPrimerosParches(): List<ParcheRequest> {
-    return supabase.from("parches")
-        .select {
-            range(0, 3)
-        }
-        .decodeList()
-}
-
 
 suspend fun obtenerParchesConImagen(): List<ParcheConImagen> {
     val parches = obtenerParches() // o tu versión limitada
@@ -89,6 +75,22 @@ suspend fun obtenerEspacioPorId(espacioId: String): Espacio? {
         .decodeSingleOrNull()
 }
 
+
+suspend fun obtenerPersonaPorEmail(email: String): Persona? {
+    return try {
+        supabase.from("personas")
+            .select {
+                filter {
+                    eq("email", email)
+                }
+                limit(1)
+            }
+            .decodeSingleOrNull()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
 
 
 

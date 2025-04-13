@@ -16,6 +16,8 @@ import com.example.parchadosapp.ui.theme.BowlbyOneSC
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.example.parchadosapp.R
+import com.example.parchadosapp.data.api.obtenerPersonaPorEmail
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,10 +26,12 @@ fun LoginScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
+    val scope = rememberCoroutineScope()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F5F0)), // Fondo beige elegante
+            .background(Color(0xFFF8F5F0)),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -36,12 +40,10 @@ fun LoginScreen(navController: NavController) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo en lugar del texto "Parchados"
             Image(
                 painter = painterResource(id = R.drawable.logo_parchados),
                 contentDescription = "Logo Parchados",
-                modifier = Modifier
-                    .size(220.dp) // Puedes ajustar el tamaño si lo ves necesario
+                modifier = Modifier.size(220.dp)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -60,12 +62,11 @@ fun LoginScreen(navController: NavController) {
                         text = "INICIA SESIÓN",
                         fontSize = 22.sp,
                         fontFamily = BowlbyOneSC,
-                        color = Color(0xFF2F4B7C) // Azul claro para encabezados
+                        color = Color(0xFF2F4B7C)
                     )
 
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    // Campo de email
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
@@ -82,7 +83,6 @@ fun LoginScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Campo de contraseña
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -100,7 +100,6 @@ fun LoginScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Mensaje de error
                     if (errorMessage.isNotEmpty()) {
                         Text(
                             text = errorMessage,
@@ -110,15 +109,17 @@ fun LoginScreen(navController: NavController) {
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
-                    // Botón de iniciar sesión
                     Button(
                         onClick = {
-                            if (email == "admin" && password == "admin") {
-                                navController.navigate("home") {
-                                    popUpTo("login") { inclusive = true }
+                            scope.launch {
+                                val persona = obtenerPersonaPorEmail(email)
+                                if (persona != null && persona.contrasena == password) {
+                                    navController.navigate("home") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                } else {
+                                    errorMessage = "Credenciales incorrectas"
                                 }
-                            } else {
-                                errorMessage = "Credenciales incorrectas"
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -130,7 +131,6 @@ fun LoginScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Botón para ir a registro
                     TextButton(onClick = { navController.navigate("register") }) {
                         Text(text = "¿No tienes cuenta? Regístrate", color = Color(0xFF1E293B))
                     }
@@ -139,3 +139,4 @@ fun LoginScreen(navController: NavController) {
         }
     }
 }
+

@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.R
 import com.example.parchadosapp.data.api.obtenerParchesConImagen
-import com.example.parchadosapp.data.api.obtenerPrimerosParches
 import com.example.parchadosapp.data.models.ParcheConImagen
 import com.example.parchadosapp.data.models.ParcheRequest
 import com.example.parchadosapp.ui.components.BottomNavigationBar
