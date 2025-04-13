@@ -56,6 +56,10 @@ suspend fun crearParche(parche: ParcheRequest): Boolean {
     }
 }
 
+suspend fun obtenerParches(): List<ParcheRequest> {
+    return supabase.from("parches").select().decodeList()
+}
+
 
 
 

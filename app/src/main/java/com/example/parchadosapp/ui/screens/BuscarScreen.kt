@@ -16,23 +16,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.parchadosapp.data.PatchRepository
+import com.example.parchadosapp.data.api.obtenerParches
+import com.example.parchadosapp.data.models.ParcheRequest
+
 import com.example.parchadosapp.ui.components.BottomNavigationBar
-import com.example.parchadosapp.ui.components.PatchCard
-import com.example.parchadosapp.ui.components.Patch
+import com.example.parchadosapp.ui.components.PatchCardFromSupabase
+import kotlinx.coroutines.launch
 
 @Composable
 fun BuscarScreen(navController: NavController, context: Context) {
 
-    val patches = PatchRepository.patches
-
+    var patches by remember { mutableStateOf<List<ParcheRequest>>(emptyList()) }
     var searchText by remember { mutableStateOf("") }
     var selectedFilters by remember { mutableStateOf(emptySet<String>()) }
-    var isSportsFilter by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            patches = obtenerParches()
+        }
+    }
 
     val filteredPatches = patches.filter { patch ->
-        val matchesSearch = searchText.isBlank() || patch.name.contains(searchText, ignoreCase = true)
-        val matchesFilter = selectedFilters.isEmpty() || patch.sport in selectedFilters || selectedFilters.any { patch.name.contains(it, ignoreCase = true) }
+        val matchesSearch = searchText.isBlank() || patch.nombre.contains(searchText, ignoreCase = true)
+        val matchesFilter = selectedFilters.isEmpty() || patch.deporte in selectedFilters || selectedFilters.any {
+            patch.nombre.contains(it, ignoreCase = true)
+        }
         matchesSearch && matchesFilter
     }
 
@@ -70,7 +80,6 @@ fun BuscarScreen(navController: NavController, context: Context) {
                 )
             }
 
-
             Text(
                 text = "Filtra, Busca y Encuentra",
                 fontSize = 24.sp,
@@ -84,10 +93,9 @@ fun BuscarScreen(navController: NavController, context: Context) {
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                itemsIndexed(filteredPatches) { index, patch ->
-                    PatchCard(patch = patch) {
-                        val originalIndex = patches.indexOf(patch)
-                        navController.navigate("patch_detail/$originalIndex")
+                itemsIndexed(filteredPatches) { _, parche ->
+                    PatchCardFromSupabase(parche = parche) {
+
                     }
                 }
             }
@@ -98,3 +106,4 @@ fun BuscarScreen(navController: NavController, context: Context) {
         BottomNavigationBar(navController, Modifier.align(Alignment.BottomCenter))
     }
 }
+

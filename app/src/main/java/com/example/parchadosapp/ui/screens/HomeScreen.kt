@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -21,18 +20,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.R
-import com.example.parchadosapp.data.PatchRepository
+import com.example.parchadosapp.data.api.obtenerParches
+import com.example.parchadosapp.data.models.ParcheRequest
 import com.example.parchadosapp.ui.components.BottomNavigationBar
-
-import com.example.parchadosapp.ui.components.Patch
-import com.example.parchadosapp.ui.components.PatchCard
+import com.example.parchadosapp.ui.components.PatchCardFromSupabase
 import com.example.parchadosapp.ui.components.SportsCarousel
 import com.example.parchadosapp.ui.theme.BrightRetro
+import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(navController: NavController, context: Context) {
 
-    val patches = PatchRepository.patches
+    var patches by remember { mutableStateOf<List<ParcheRequest>>(emptyList()) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        scope.launch {
+            patches = obtenerParches()
+        }
+    }
+
+
+
+
 
     Box(
         modifier = Modifier
@@ -122,11 +132,12 @@ fun HomeScreen(navController: NavController, context: Context) {
                         modifier = Modifier.padding(vertical = 16.dp)
                     )
                 }
-                itemsIndexed(patches) { index, patch ->
-                    PatchCard(patch = patch) {
-                        navController.navigate("patch_detail/$index")
+                itemsIndexed(patches) { index, parche ->
+                    PatchCardFromSupabase(parche = parche) {
+
                     }
                 }
+
             }
 
             Spacer(modifier = Modifier.height(120.dp))
