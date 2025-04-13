@@ -9,6 +9,8 @@ import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.serialization.json.Json
+import com.example.parchadosapp.data.models.ParcheConImagen
+
 
 
 
@@ -68,6 +70,24 @@ suspend fun obtenerPrimerosParches(): List<ParcheRequest> {
         .decodeList()
 }
 
+
+suspend fun obtenerParchesConImagen(): List<ParcheConImagen> {
+    val parches = obtenerParches() // o tu versión limitada
+    return parches.map { parche ->
+        val espacio = obtenerEspacioPorId(parche.espacio_id)
+        ParcheConImagen(parche, espacio?.imagen_url)
+    }
+}
+
+suspend fun obtenerEspacioPorId(espacioId: String): Espacio? {
+    return supabase.from("espacios")
+        .select {
+            filter {
+                eq("id", espacioId)
+            }
+        }
+        .decodeSingleOrNull()
+}
 
 
 

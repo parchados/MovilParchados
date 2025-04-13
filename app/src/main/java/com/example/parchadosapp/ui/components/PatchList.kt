@@ -16,8 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
-import com.example.parchadosapp.R
-import com.example.parchadosapp.data.models.ParcheRequest
+import coil.compose.AsyncImage
+import com.example.parchadosapp.data.models.ParcheConImagen
 
 data class Patch(
     val image: Int,
@@ -74,7 +74,9 @@ fun PatchCard(patch: Patch, onClick: () -> Unit) {
 }
 
 @Composable
-fun PatchCardFromSupabase(parche: ParcheRequest, onClick: () -> Unit) {
+fun PatchCardFromSupabase(parcheConImagen: ParcheConImagen, onClick: () -> Unit) {
+    val parche = parcheConImagen.parche
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -89,9 +91,9 @@ fun PatchCardFromSupabase(parche: ParcheRequest, onClick: () -> Unit) {
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.billarl), // usa una imagen por defecto
-                contentDescription = "Imagen del parche",
+            AsyncImage(
+                model = parcheConImagen.imagenUrl ?: "https://via.placeholder.com/150",
+                contentDescription = "Imagen del espacio",
                 modifier = Modifier
                     .size(80.dp)
                     .clip(CircleShape)

@@ -17,5 +17,6 @@ data class Espacio(
     val caract_vestuarios: Boolean,
     val caract_gradas: Boolean,
     val caract_techado: Boolean,
-    val caract_tipo_superficie: String
+    val caract_tipo_superficie: String,
+    val imagen_url: String? = null
 )

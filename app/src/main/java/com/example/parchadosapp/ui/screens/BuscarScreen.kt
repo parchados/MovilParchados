@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.data.api.obtenerParches
+import com.example.parchadosapp.data.api.obtenerParchesConImagen
+import com.example.parchadosapp.data.models.ParcheConImagen
 import com.example.parchadosapp.data.models.ParcheRequest
 
 import com.example.parchadosapp.ui.components.BottomNavigationBar
@@ -26,7 +28,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BuscarScreen(navController: NavController, context: Context) {
 
-    var patches by remember { mutableStateOf<List<ParcheRequest>>(emptyList()) }
+    var patches by remember { mutableStateOf<List<ParcheConImagen>>(emptyList()) }
     var searchText by remember { mutableStateOf("") }
     var selectedFilters by remember { mutableStateOf(emptySet<String>()) }
 
@@ -34,15 +36,16 @@ fun BuscarScreen(navController: NavController, context: Context) {
 
     LaunchedEffect(Unit) {
         scope.launch {
-            patches = obtenerParches()
+            patches = obtenerParchesConImagen()
         }
     }
 
-    val filteredPatches = patches.filter { patch ->
-        val matchesSearch = searchText.isBlank() || patch.nombre.contains(searchText, ignoreCase = true)
-        val matchesFilter = selectedFilters.isEmpty() || patch.deporte in selectedFilters || selectedFilters.any {
-            patch.nombre.contains(it, ignoreCase = true)
-        }
+    // Filtro por texto y deporte
+    val filteredPatches = patches.filter { parcheConImagen ->
+        val parche = parcheConImagen.parche
+        val matchesSearch = searchText.isBlank() || parche.nombre.contains(searchText, ignoreCase = true)
+        val matchesFilter = selectedFilters.isEmpty() || parche.deporte in selectedFilters ||
+                selectedFilters.any { parche.nombre.contains(it, ignoreCase = true) }
         matchesSearch && matchesFilter
     }
 
@@ -93,9 +96,9 @@ fun BuscarScreen(navController: NavController, context: Context) {
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                itemsIndexed(filteredPatches) { _, parche ->
-                    PatchCardFromSupabase(parche = parche) {
-
+                itemsIndexed(filteredPatches) { _, parcheConImagen ->
+                    PatchCardFromSupabase(parcheConImagen = parcheConImagen) {
+                        // Acciones al hacer clic
                     }
                 }
             }
