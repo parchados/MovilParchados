@@ -60,6 +60,17 @@ suspend fun obtenerParches(): List<ParcheRequest> {
     return supabase.from("parches").select().decodeList()
 }
 
+suspend fun obtenerPrimerosParches(): List<ParcheRequest> {
+    return supabase.from("parches")
+        .select {
+            range(0, 3)
+        }
+        .decodeList()
+}
+
+
+
+
 
 
 

@@ -13,7 +13,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.ui.theme.BowlbyOneSC
-import com.example.parchadosapp.ui.theme.BrightRetro
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.example.parchadosapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,12 +36,12 @@ fun LoginScreen(navController: NavController) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Título "Parchados"
-            Text(
-                text = "Parchados",
-                fontSize = 38.sp,
-                fontFamily = BrightRetro,
-                color = Color(0xFF003F5C) // Azul profundo
+            // Logo en lugar del texto "Parchados"
+            Image(
+                painter = painterResource(id = R.drawable.logo_parchados),
+                contentDescription = "Logo Parchados",
+                modifier = Modifier
+                    .size(220.dp) // Puedes ajustar el tamaño si lo ves necesario
             )
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -67,14 +69,14 @@ fun LoginScreen(navController: NavController) {
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
-                        label = { Text("EMAIL", color = Color(0xFF1E293B)) }, // Gris oscuro
+                        label = { Text("EMAIL", color = Color(0xFF1E293B)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color(0xFF2F4B7C), // Azul claro
+                            focusedBorderColor = Color(0xFF2F4B7C),
                             unfocusedBorderColor = Color.Gray,
-                            textColor = Color.Black, // Color del texto ingresado
-                            cursorColor = Color.Black // Color del cursor
+                            textColor = Color.Black,
+                            cursorColor = Color.Black
                         )
                     )
 
@@ -91,8 +93,8 @@ fun LoginScreen(navController: NavController) {
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             focusedBorderColor = Color(0xFF2F4B7C),
                             unfocusedBorderColor = Color.Gray,
-                            textColor = Color.Black, // Color del texto ingresado
-                            cursorColor = Color.Black // Color del cursor
+                            textColor = Color.Black,
+                            cursorColor = Color.Black
                         )
                     )
 
@@ -120,10 +122,10 @@ fun LoginScreen(navController: NavController) {
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEAC67A)), // Amarillo dorado
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFEAC67A)),
                         shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text(text = "Iniciar Sesión", fontSize = 18.sp, color = Color(0xFF003F5C)) // Azul profundo en el texto
+                        Text(text = "Iniciar Sesión", fontSize = 18.sp, color = Color(0xFF003F5C))
                     }
 
                     Spacer(modifier = Modifier.height(20.dp))

@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.R
-import com.example.parchadosapp.data.api.obtenerParches
+import com.example.parchadosapp.data.api.obtenerPrimerosParches
 import com.example.parchadosapp.data.models.ParcheRequest
 import com.example.parchadosapp.ui.components.BottomNavigationBar
 import com.example.parchadosapp.ui.components.PatchCardFromSupabase
@@ -36,7 +36,7 @@ fun HomeScreen(navController: NavController, context: Context) {
 
     LaunchedEffect(Unit) {
         scope.launch {
-            patches = obtenerParches()
+            patches = obtenerPrimerosParches()
         }
     }
 

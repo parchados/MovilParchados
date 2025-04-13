@@ -21,6 +21,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import java.util.*
 import com.example.parchadosapp.ui.theme.*
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.example.parchadosapp.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,14 +32,12 @@ fun RegisterScreen(navController: NavController) {
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var birthdate by remember { mutableStateOf("") }
-    var selectedGender by remember { mutableStateOf("Masculino") }
-    var selectedOption by remember { mutableStateOf("Competir") }
     val context = LocalContext.current
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F5F0)), // Fondo beige elegante
+            .background(Color(0xFFF8F5F0)),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -46,18 +47,16 @@ fun RegisterScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // 🔹 Título "Parchados" más grande
-            Text(
-                text = "Parchados",
-                fontSize = 48.sp, // 🔹 Más grande
-                fontFamily = BrightRetro,
-                color = Color(0xFF003F5C),
-                textAlign = TextAlign.Center
+            // 🔹 Logo en vez de título
+            Image(
+                painter = painterResource(id = R.drawable.logo_parchados),
+                contentDescription = "Logo Parchados",
+                modifier = Modifier
+                    .size(220.dp)
             )
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 🔹 Caja blanca con el formulario
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(15.dp),
@@ -68,7 +67,6 @@ fun RegisterScreen(navController: NavController) {
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // 🔹 Texto de bienvenida
                     Text(
                         text = "JUEGA, RESERVA Y GANA.\nÚNETE A PARCHADOS.",
                         fontSize = 18.sp,
@@ -79,7 +77,6 @@ fun RegisterScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // 🔹 Campo de email
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
@@ -94,7 +91,6 @@ fun RegisterScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // 🔹 Campo de nombre
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
@@ -109,7 +105,6 @@ fun RegisterScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // 🔹 Campo de contraseña (movido después de nombre)
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
@@ -125,7 +120,6 @@ fun RegisterScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // 🔹 Campo de fecha de nacimiento
                     OutlinedTextField(
                         value = birthdate,
                         onValueChange = {},
@@ -147,73 +141,8 @@ fun RegisterScreen(navController: NavController) {
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // 🔹 Selección de género
-                    Text(text = "Género", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF003F5C))
-                    val genderOptions = listOf("Masculino", "Femenino", "Otro", "Prefiero no decir")
-                    var expanded by remember { mutableStateOf(false) }
-
-                    Box {
-                        OutlinedTextField(
-                            value = selectedGender,
-                            onValueChange = {},
-                            modifier = Modifier.fillMaxWidth(),
-                            readOnly = true,
-                            shape = RoundedCornerShape(10.dp),
-                            trailingIcon = {
-                                IconButton(onClick = { expanded = true }) {
-                                    Icon(
-                                        imageVector = androidx.compose.material.icons.Icons.Default.ArrowDropDown,
-                                        contentDescription = "Seleccionar Género"
-                                    )
-                                }
-                            },
-                            colors = TextFieldDefaults.outlinedTextFieldColors(
-                                textColor = Color.Black,
-                                cursorColor = Color.Black
-                            )
-                        )
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier.background(Color.White) // 🔹 Fondo más claro
-                        ) {
-                            genderOptions.forEach { gender ->
-                                DropdownMenuItem(
-                                    text = { Text(gender, color = Color.Black) }, // 🔹 Texto negro para mejor visibilidad
-                                    onClick = {
-                                        selectedGender = gender
-                                        expanded = false
-                                    },
-                                    modifier = Modifier.background(Color(0xFFF8F5F0)) // 🔹 Fondo beige claro para visibilidad
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // 🔹 Pregunta "¿Qué buscas?"
-                    Text(text = "¿Qué buscas?", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF003F5C))
-                    Row {
-                        listOf("Competir", "Parchar").forEach { option ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(end = 12.dp)
-                            ) {
-                                RadioButton(
-                                    selected = (selectedOption == option),
-                                    onClick = { selectedOption = option }
-                                )
-                                Text(text = option, color = Color.Black)
-                            }
-                        }
-                    }
-
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // 🔹 Botón de Registro
                     Button(
                         onClick = { /* Acción de Registro */ },
                         modifier = Modifier.fillMaxWidth(),
@@ -225,7 +154,6 @@ fun RegisterScreen(navController: NavController) {
 
                     Spacer(modifier = Modifier.height(15.dp))
 
-                    // 🔹 Enlace para regresar a inicio de sesión
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
@@ -257,4 +185,3 @@ fun showDatePicker(context: Context, onDateSelected: (String) -> Unit) {
     )
     datePickerDialog.show()
 }
-
