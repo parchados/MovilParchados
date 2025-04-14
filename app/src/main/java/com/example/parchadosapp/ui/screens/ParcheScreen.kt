@@ -1,8 +1,12 @@
 package com.example.parchadosapp.ui.screens
 
+import NotificacionRequest
 import android.app.DatePickerDialog
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.TimePickerDialog
 import android.content.Context
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -26,11 +30,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.parchadosapp.data.PatchRepository
 import com.example.parchadosapp.data.api.crearParche
 import com.example.parchadosapp.data.api.obtenerEspaciosPorLugar
 import com.example.parchadosapp.ui.components.BottomNavigationBar
-import com.example.parchadosapp.ui.components.Patch
 import com.example.parchadosapp.ui.theme.*
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -47,13 +49,17 @@ import kotlinx.coroutines.withContext
 import com.google.android.gms.maps.CameraUpdateFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import com.example.parchadosapp.R
+import com.example.parchadosapp.data.SessionManager.SessionManager
+import com.example.parchadosapp.data.api.crearNotificacionParaUsuario
 import java.time.LocalTime
-
-
-
+import android.Manifest
+import android.content.pm.PackageManager
+import com.example.parchadosapp.data.api.crearNotificacion
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +90,8 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var lugares by remember { mutableStateOf<List<Pair<Lugar, LatLng>>>(emptyList()) }
     var espacios by remember { mutableStateOf<List<Espacio>>(emptyList()) }
     var espacioSeleccionadoId by remember { mutableStateOf<String?>(null) }
+
+
 
 
     LaunchedEffect(Unit) {
@@ -139,18 +147,29 @@ fun ParcheScreen(navController: NavController, context: Context) {
                     readOnly = true,
                     label = { Text("Fecha") },
                     trailingIcon = {
-                        IconButton(onClick = { showParcheDatePicker(localContext) { date = it } }) {
+                        IconButton(onClick = {
+                            showParcheDatePicker(localContext) { selectedDate ->
+                                // Convierte dd/MM/yyyy a yyyy-MM-dd
+                                val parts = selectedDate.split("/")
+                                if (parts.size == 3) {
+                                    date = "${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}"
+                                }
+                            }
+                        }) {
                             Icon(imageVector = Icons.Default.DateRange, contentDescription = null)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        textColor = TextColor, cursorColor = PrimaryColor,
-                        focusedBorderColor = PrimaryColor, unfocusedBorderColor = SecondaryColor,
+                        textColor = TextColor,
+                        cursorColor = PrimaryColor,
+                        focusedBorderColor = PrimaryColor,
+                        unfocusedBorderColor = SecondaryColor,
                         containerColor = White
                     )
                 )
+
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -447,9 +466,26 @@ fun ParcheScreen(navController: NavController, context: Context) {
                                 val creado = crearParche(parcheRequest)
                                 withContext(Dispatchers.Main) {
                                     if (creado) {
+                                        val userId = SessionManager.getUserId(context)
+
+                                        if (userId != null) {
+                                            val notificacion = NotificacionRequest(
+                                                tipo = "parche",
+                                                titulo = "¡Parche creado!",
+                                                descripcion = "🎉 Felicidades, tu parche fue creado. ¡Pásala al máximo!",
+                                                destinatario_id = userId,
+                                                referencia_tipo = "parche"
+                                            )
+
+                                            crearNotificacion(notificacion)
+                                            mostrarNotificacionLocal(context) // si ya la tienes definida
+                                        }
+
                                         Toast.makeText(context, "Parche creado exitosamente", Toast.LENGTH_LONG).show()
                                         navController.popBackStack()
-                                    } else {
+                                    }
+
+                                    else {
                                         Toast.makeText(context, "Error al crear el parche", Toast.LENGTH_LONG).show()
                                     }
                                 }
@@ -471,6 +507,45 @@ fun ParcheScreen(navController: NavController, context: Context) {
     }
 }
 
+
+fun mostrarNotificacionLocal(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            // No se tiene el permiso, simplemente no se muestra la notificación
+            return
+        }
+    }
+
+    // Crear canal si es necesario
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            "default_channel",
+            "Canal Parches",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Canal de notificaciones de parchados"
+        }
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.createNotificationChannel(channel)
+    }
+
+    // Crear y mostrar notificación
+    val notification = NotificationCompat.Builder(context, "default_channel")
+        .setSmallIcon(R.drawable.ic_launcher_foreground)
+        .setContentTitle("¡Nuevo parche creado!")
+        .setContentText("🎉 Felicidades, tu parche fue creado. ¡Pásala al máximo!")
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setAutoCancel(true)
+        .build()
+
+    NotificationManagerCompat.from(context).notify(
+        (System.currentTimeMillis() % 10000).toInt(),
+        notification
+    )
+}
 
 
 

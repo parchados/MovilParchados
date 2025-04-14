@@ -1,5 +1,6 @@
 package com.example.parchadosapp.data.api
 
+import NotificacionRequest
 import com.example.parchadosapp.data.models.Espacio
 import com.example.parchadosapp.data.models.Lugar
 import com.example.parchadosapp.data.models.Notificacion
@@ -146,6 +147,38 @@ suspend fun eliminarNotificacionesPorUsuario(usuarioId: String): Boolean {
         false
     }
 }
+
+suspend fun crearNotificacionParaUsuario(usuarioId: String): Boolean {
+    return try {
+        supabase.from("notificaciones")
+            .insert(
+                mapOf(
+                    "tipo" to "parche",
+                    "titulo" to "¡Nuevo parche creado!",
+                    "descripcion" to "🎉 Felicidades, tu parche fue creado. ¡Pásala al máximo!",
+                    "destinatario_id" to usuarioId,
+                    "referencia_tipo" to "parche",
+                    "leida" to false,
+                    "estado" to "Activo"
+                )
+            )
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+suspend fun crearNotificacion(notificacion: NotificacionRequest): Boolean {
+    return try {
+        supabase.from("notificaciones").insert(notificacion)
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
 
 
 

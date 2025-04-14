@@ -26,6 +26,7 @@ import com.example.parchadosapp.data.api.marcarNotificacionComoLeida
 import com.example.parchadosapp.data.api.obtenerNotificacionesPorUsuario
 import com.example.parchadosapp.data.models.Notificacion
 import com.example.parchadosapp.ui.theme.SecondaryColor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -43,9 +44,19 @@ fun NotificationsScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         val userId = SessionManager.getUserId(context)
         if (userId != null) {
-            val notificaciones = obtenerNotificacionesPorUsuario(userId)
-            notificationsList.clear()
-            notificationsList.addAll(notificaciones)
+            while (true) {
+                try {
+                    val nuevas = obtenerNotificacionesPorUsuario(userId)
+                    // ✅ Solo actualiza si hay cambios en la lista
+                    if (nuevas != notificationsList) {
+                        notificationsList.clear()
+                        notificationsList.addAll(nuevas)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                delay(3000)
+            }
         }
     }
 
