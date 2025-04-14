@@ -31,6 +31,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.Snackbar
 import androidx.core.app.ActivityCompat
 import com.example.parchadosapp.R
+import com.example.parchadosapp.data.SessionManager.SessionManager
+import com.example.parchadosapp.data.api.obtenerNotificacionesPorUsuario
+import com.example.parchadosapp.data.models.Notificacion
 import com.example.parchadosapp.ui.theme.SecondaryColor
 import kotlinx.coroutines.launch
 
@@ -51,107 +54,17 @@ fun NotificationsScreen(navController: NavController) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-    val userName = "Juan"
 
-    val notificationsList = remember { mutableStateListOf<String>() }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val notificationsList = remember { mutableStateListOf<Notificacion>() }
 
+    // 🔁 Obtener notificaciones reales al iniciar
     LaunchedEffect(Unit) {
-        if (notificationsList.isEmpty()) {
-            notificationsList.addAll(
-                listOf(
-                    "🎉 ¡$userName, nuevo torneo de fútbol este sábado!",
-                    "📅 $userName, has sido invitado a un partido de tenis",
-                    "🕒 $userName, recuerda tu partido de baloncesto a las 5PM"
-                )
-            )
-        }
-    }
-
-    // Función para crear canal de notificación
-    fun createNotificationChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Default Channel"
-            val descriptionText = "Canal para notificaciones"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel("default_channel", name, importance).apply {
-                description = descriptionText
-            }
-            val notificationManager: NotificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    // ✅ FUNCION CLAVE: VERIFICACIÓN DE PERMISOS DE NOTIFICACIÓN
-    fun checkNotificationPermission(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Verificar si el permiso fue concedido en Android 13 o superior
-            ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            // Para versiones anteriores, no es necesario pedir el permiso
-            true
-        }
-    }
-
-    // Función para enviar la notificación
-    fun sendNotification(context: Context) {
-        createNotificationChannel(context)
-
-        val notificationId = (System.currentTimeMillis() % Int.MAX_VALUE).toInt()
-
-        val notification = NotificationCompat.Builder(context, "default_channel")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Nueva Notificación")
-            .setContentText("¡Hora de Parchar! 🎉")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setAutoCancel(true)
-            .build()
-
-        NotificationManagerCompat.from(context).notify(notificationId, notification)
-    }
-
-    // Solicitud de permiso (Android 13+)
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            sendNotification(context)
-            val mensaje = "📢 $userName, tienes una nueva notificación enviada manualmente"
-            notificationsList.add(0, mensaje)
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar("¡Tienes una nueva notificación!")
-            }
-        } else {
-            println("Permiso para notificaciones denegado.")
-        }
-    }
-
-    // Función que envía notificación a sistema y agrega a la UI
-    fun sendNotificationToUI() {
-        val mensaje = "📢 $userName, tienes una nueva notificación enviada manualmente"
-
-        if (checkNotificationPermission(context)) {
-            sendNotification(context)
-            notificationsList.add(0, mensaje)
-
-            coroutineScope.launch {
-                snackbarHostState.showSnackbar("¡Tienes una nueva notificación!")
-            }
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                sendNotification(context)
-                notificationsList.add(0, mensaje)
-
-                coroutineScope.launch {
-                    snackbarHostState.showSnackbar("¡Tienes una nueva notificación!")
-                }
-            }
+        val userId = SessionManager.getUserId(context)
+        if (userId != null) {
+            val notificaciones = obtenerNotificacionesPorUsuario(userId)
+            notificationsList.clear()
+            notificationsList.addAll(notificaciones)
         }
     }
 
@@ -190,21 +103,7 @@ fun NotificationsScreen(navController: NavController) {
                 )
             }
 
-            // Botón Enviar
-            Button(
-                onClick = { sendNotificationToUI() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFEAC67A),
-                    contentColor = Color(0xFF003F5C)
-                )
-            ) {
-                Text(text = "Enviar Notificación", fontSize = 18.sp)
-            }
-
-            // Botón Eliminar con diálogo de confirmación
+            // Botón eliminar
             Button(
                 onClick = { showDeleteDialog = true },
                 modifier = Modifier
@@ -224,13 +123,13 @@ fun NotificationsScreen(navController: NavController) {
                 Text(text = "Eliminar Notificaciones")
             }
 
-            // Lista de notificaciones
+            // Lista de notificaciones reales
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                notificationsList.forEach { notification ->
+                notificationsList.forEach { noti ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -238,17 +137,30 @@ fun NotificationsScreen(navController: NavController) {
                         colors = CardDefaults.cardColors(containerColor = Color.White),
                         elevation = CardDefaults.cardElevation(4.dp)
                     ) {
-                        Text(
-                            text = notification,
-                            modifier = Modifier.padding(16.dp),
-                            fontSize = 16.sp,
-                            color = Color(0xFF003F5C)
-                        )
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = noti.titulo,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF003F5C)
+                            )
+                            Text(
+                                text = noti.descripcion,
+                                fontSize = 14.sp,
+                                color = Color.Gray
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "📅 ${noti.fecha_creacion.substring(0, 10)}",
+                                fontSize = 12.sp,
+                                color = Color(0xFF003F5C)
+                            )
+                        }
                     }
                 }
             }
 
-            // Diálogo de confirmación
+            // Diálogo para confirmar borrado
             if (showDeleteDialog) {
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false },
@@ -272,6 +184,4 @@ fun NotificationsScreen(navController: NavController) {
         }
     }
 }
-
-
 

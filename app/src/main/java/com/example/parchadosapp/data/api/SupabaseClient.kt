@@ -2,6 +2,7 @@ package com.example.parchadosapp.data.api
 
 import com.example.parchadosapp.data.models.Espacio
 import com.example.parchadosapp.data.models.Lugar
+import com.example.parchadosapp.data.models.Notificacion
 import com.example.parchadosapp.data.models.ParcheRequest
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
@@ -102,6 +103,17 @@ suspend fun obtenerPersonaPorId(id: String): Persona? {
             limit(1)
         }
         .decodeSingleOrNull()
+}
+
+
+suspend fun obtenerNotificacionesPorUsuario(usuarioId: String): List<Notificacion> {
+    return supabase.from("notificaciones")
+        .select {
+            filter {
+                eq("destinatario_id", usuarioId)
+            }
+        }
+        .decodeList()
 }
 
 
