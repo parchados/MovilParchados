@@ -31,8 +31,18 @@ import com.example.parchadosapp.data.api.mostrarConfirmacion
 import com.example.parchadosapp.data.api.obtenerParchesConImagen
 import com.example.parchadosapp.data.api.reducirCupo
 import com.example.parchadosapp.data.api.salirDeParche
+import com.example.parchadosapp.data.api.supabase
 import com.example.parchadosapp.data.api.unirseAParche
 import com.example.parchadosapp.data.models.ParcheConImagen
+import io.github.jan.supabase.postgrest.from
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class PersonaParche(
+    val persona_id: String,
+    val parche_id: String
+)
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,17 +54,24 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
     var parcheConImagen by remember { mutableStateOf<ParcheConImagen?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var userId by remember { mutableStateOf<String?>(null) }
-    var estaInscrito by remember { mutableStateOf<Boolean?>(null) }
+    var estaInscrito by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         userId = SessionManager.getUserId(context)
-
         try {
             val todos = obtenerParchesConImagen()
             parcheConImagen = todos.firstOrNull { it.parche.id == parcheId }
 
             if (userId != null) {
-                estaInscrito = estaInscritoEnParche(userId!!, parcheId)
+                val resultado = supabase.from("personas_parches")
+                    .select {
+                        filter {
+                            eq("persona_id", userId!!)
+                            eq("parche_id", parcheId)
+                        }
+                    }
+                    .decodeList<PersonaParche>()
+                estaInscrito = resultado.isNotEmpty()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -153,7 +170,7 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
                             Text("Eliminar Parche", color = Color.White)
                         }
                     } else {
-                        if (estaInscrito == true) {
+                        if (estaInscrito) {
                             Button(
                                 onClick = {
                                     scope.launch {
@@ -161,18 +178,16 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
                                         if (confirm) {
                                             val salio = salirDeParche(userId!!, parcheId)
                                             if (salio) {
-                                                aumentarCupo(parcheId)
                                                 estaInscrito = false
                                                 Toast.makeText(context, "Has salido del parche", Toast.LENGTH_SHORT).show()
-                                                crearNotificacion(
-                                                    NotificacionRequest(
-                                                        tipo = "parche",
-                                                        titulo = "Saliste de un parche",
-                                                        descripcion = "🚪 Has salido del parche ${parche.nombre}",
-                                                        destinatario_id = userId!!,
-                                                        referencia_tipo = "parche"
-                                                    )
+                                                val noti = NotificacionRequest(
+                                                    tipo = "parche",
+                                                    titulo = "Saliste de un parche",
+                                                    descripcion = "🚪 Has salido del parche ${parche.nombre}",
+                                                    destinatario_id = userId!!,
+                                                    referencia_tipo = "parche"
                                                 )
+                                                crearNotificacion(noti)
                                                 mostrarNotificacionLocal(context)
                                             }
                                         }
@@ -189,18 +204,16 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
                                     scope.launch {
                                         val unido = unirseAParche(userId!!, parcheId)
                                         if (unido) {
-                                            reducirCupo(parcheId)
                                             estaInscrito = true
                                             Toast.makeText(context, "Te has unido al parche", Toast.LENGTH_SHORT).show()
-                                            crearNotificacion(
-                                                NotificacionRequest(
-                                                    tipo = "parche",
-                                                    titulo = "¡Te uniste a un parche!",
-                                                    descripcion = "🎉 Ahora haces parte del parche ${parche.nombre}",
-                                                    destinatario_id = userId!!,
-                                                    referencia_tipo = "parche"
-                                                )
+                                            val noti = NotificacionRequest(
+                                                tipo = "parche",
+                                                titulo = "¡Te uniste a un parche!",
+                                                descripcion = "🎉 Ahora haces parte del parche ${parche.nombre}",
+                                                destinatario_id = userId!!,
+                                                referencia_tipo = "parche"
                                             )
+                                            crearNotificacion(noti)
                                             mostrarNotificacionLocal(context)
                                         }
                                     }
@@ -217,4 +230,5 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
         }
     }
 }
+
 
