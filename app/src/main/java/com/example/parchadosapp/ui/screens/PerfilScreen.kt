@@ -30,16 +30,23 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.parchadosapp.R
 import com.example.parchadosapp.ui.theme.*
 import androidx.compose.ui.graphics.Color
+import com.example.parchadosapp.data.SessionManager.SessionManager
+import com.example.parchadosapp.data.api.obtenerPersonaPorId
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilScreen(navController: NavController) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
-    var showExitDialog by remember { mutableStateOf(false) } // Para salir
-    var showNameDialog by remember { mutableStateOf(false) } // Para cambiar nombre
-    var nombreUsuario by remember { mutableStateOf("Juan") } // Nombre editable
+    var showExitDialog by remember { mutableStateOf(false) }
+    var showNameDialog by remember { mutableStateOf(false) }
+    var nombreUsuario by remember { mutableStateOf("Cargando...") }
     var nuevoNombre by remember { mutableStateOf("") }
+    var fotoPerfilUrl by remember { mutableStateOf<String?>(null) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -55,15 +62,27 @@ fun PerfilScreen(navController: NavController) {
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            if (granted) {
-                val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                cameraLauncher.launch(intent)
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+            cameraLauncher.launch(intent)
+        }
+    }
+
+    // Cargar datos del usuario logueado
+    LaunchedEffect(Unit) {
+        val userId = SessionManager.getUserId(context)
+        userId?.let {
+            val persona = obtenerPersonaPorId(it)
+            if (persona != null) {
+                nombreUsuario = persona.nombre
+                fotoPerfilUrl = persona.foto_perfil
             }
         }
-    )
+    }
 
+    // UI...
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -74,8 +93,7 @@ fun PerfilScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             IconButton(
                 onClick = { navController.popBackStack() },
@@ -110,54 +128,47 @@ fun PerfilScreen(navController: NavController) {
                 contentAlignment = Alignment.Center
             ) {
                 when {
-                    bitmap != null -> {
-                        Image(
-                            bitmap = bitmap!!.asImageBitmap(),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                        )
-                    }
-                    imageUri != null -> {
-                        Image(
-                            painter = rememberAsyncImagePainter(imageUri),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(CircleShape)
-                        )
-                    }
-                    else -> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.perfil),
-                            contentDescription = null,
-                            modifier = Modifier.size(70.dp),
-                            tint = Color.White
-                        )
-                    }
+                    bitmap != null -> Image(
+                        bitmap = bitmap!!.asImageBitmap(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    )
+                    imageUri != null -> Image(
+                        painter = rememberAsyncImagePainter(imageUri),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    )
+                    fotoPerfilUrl != null -> Image(
+                        painter = rememberAsyncImagePainter(fotoPerfilUrl),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape)
+                    )
+                    else -> Icon(
+                        painter = painterResource(id = R.drawable.perfil),
+                        contentDescription = null,
+                        modifier = Modifier.size(70.dp),
+                        tint = Color.White
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Botones de galería y cámara
+            // Galería y cámara
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 IconButton(
                     onClick = { galleryLauncher.launch("image/*") },
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFEAC67A))
+                    modifier = Modifier.size(50.dp).clip(CircleShape).background(Color(0xFFEAC67A))
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.galeria),
-                        contentDescription = "Elegir desde galería",
+                        contentDescription = "Galería",
                         modifier = Modifier.size(30.dp),
                         tint = Color(0xFF003F5C)
                     )
@@ -167,14 +178,11 @@ fun PerfilScreen(navController: NavController) {
 
                 IconButton(
                     onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
-                    modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape)
-                        .background(Color(0xFFEAC67A))
+                    modifier = Modifier.size(50.dp).clip(CircleShape).background(Color(0xFFEAC67A))
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.camara),
-                        contentDescription = "Tomar foto con cámara",
+                        contentDescription = "Cámara",
                         modifier = Modifier.size(30.dp),
                         tint = Color(0xFF003F5C)
                     )
@@ -183,15 +191,12 @@ fun PerfilScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Botón para cambiar nombre
             Button(
                 onClick = {
                     nuevoNombre = nombreUsuario
                     showNameDialog = true
                 },
-                modifier = Modifier
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(10.dp)),
+                modifier = Modifier.height(50.dp).clip(RoundedCornerShape(10.dp)),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFEAC67A),
                     contentColor = Color(0xFF003F5C)
@@ -202,13 +207,9 @@ fun PerfilScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón de Salir
             Button(
                 onClick = { showExitDialog = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(55.dp)
-                    .clip(RoundedCornerShape(10.dp)),
+                modifier = Modifier.fillMaxWidth().height(55.dp).clip(RoundedCornerShape(10.dp)),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF003F5C),
                     contentColor = Color.White
@@ -225,7 +226,7 @@ fun PerfilScreen(navController: NavController) {
             }
         }
 
-        // Diálogo para salir
+        // 🔧 Diálogo de salida con coroutine
         if (showExitDialog) {
             AlertDialog(
                 onDismissRequest = { showExitDialog = false },
@@ -234,8 +235,12 @@ fun PerfilScreen(navController: NavController) {
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            navController.navigate("login")
-                            showExitDialog = false
+                            scope.launch {
+                                SessionManager.clearSession(context)
+                                navController.navigate("login") {
+                                    popUpTo("perfil") { inclusive = true }
+                                }
+                            }
                         }
                     ) {
                         Text("Sí")
@@ -249,7 +254,6 @@ fun PerfilScreen(navController: NavController) {
             )
         }
 
-        // Diálogo para cambiar nombre
         if (showNameDialog) {
             AlertDialog(
                 onDismissRequest = { showNameDialog = false },
@@ -279,4 +283,6 @@ fun PerfilScreen(navController: NavController) {
         }
     }
 }
+
+
 

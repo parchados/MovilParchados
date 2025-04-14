@@ -120,6 +120,8 @@ dependencies {
 
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.0.3")
 
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
 
 
 }

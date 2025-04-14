@@ -14,8 +14,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.parchadosapp.ui.theme.BowlbyOneSC
 import androidx.compose.foundation.Image
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.example.parchadosapp.R
+import com.example.parchadosapp.data.SessionManager.SessionManager
 import com.example.parchadosapp.data.api.obtenerPersonaPorEmail
 import kotlinx.coroutines.launch
 
@@ -25,6 +27,7 @@ fun LoginScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     val scope = rememberCoroutineScope()
 
@@ -114,6 +117,8 @@ fun LoginScreen(navController: NavController) {
                             scope.launch {
                                 val persona = obtenerPersonaPorEmail(email)
                                 if (persona != null && persona.contrasena == password) {
+                                    SessionManager.saveUserId(context, persona.id) // ← guardar ID
+
                                     navController.navigate("home") {
                                         popUpTo("login") { inclusive = true }
                                     }

@@ -93,6 +93,18 @@ suspend fun obtenerPersonaPorEmail(email: String): Persona? {
 }
 
 
+suspend fun obtenerPersonaPorId(id: String): Persona? {
+    return supabase.from("personas")
+        .select {
+            filter {
+                eq("id", id)
+            }
+            limit(1)
+        }
+        .decodeSingleOrNull()
+}
+
+
 
 
 
