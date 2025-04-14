@@ -1,6 +1,7 @@
 package com.example.parchadosapp.data.api
 
 import NotificacionRequest
+import android.app.AlertDialog
 import com.example.parchadosapp.data.models.Espacio
 import com.example.parchadosapp.data.models.Lugar
 import com.example.parchadosapp.data.models.Notificacion
@@ -13,6 +14,9 @@ import io.github.jan.supabase.serializer.KotlinXSerializer
 import kotlinx.serialization.json.Json
 import com.example.parchadosapp.data.models.ParcheConImagen
 import com.example.parchadosapp.data.models.Persona
+import kotlinx.coroutines.suspendCancellableCoroutine
+import android.content.Context
+
 
 val supabase: SupabaseClient = createSupabaseClient(
     supabaseUrl = "https://giynykejishwdmsgshag.supabase.co",
@@ -224,14 +228,17 @@ suspend fun estaInscritoEnParche(usuarioId: String, parcheId: String): Boolean {
                     eq("persona_id", usuarioId)
                     eq("parche_id", parcheId)
                 }
+                limit(1)
             }
-            .decodeList<Any>()
+            .decodeList<Map<String, Any>>() // Validamos por existencia
         resultado.isNotEmpty()
     } catch (e: Exception) {
         e.printStackTrace()
         false
     }
 }
+
+
 
 
 suspend fun unirseAParche(usuarioId: String, parcheId: String): Boolean {
@@ -267,8 +274,54 @@ suspend fun salirDeParche(usuarioId: String, parcheId: String): Boolean {
     }
 }
 
+suspend fun mostrarConfirmacion(context: Context, mensaje: String): Boolean {
+    return suspendCancellableCoroutine { cont ->
+        AlertDialog.Builder(context)
+            .setTitle("Confirmación")
+            .setMessage(mensaje)
+            .setPositiveButton("Sí") { _, _ -> cont.resume(true) {} }
+            .setNegativeButton("No") { _, _ -> cont.resume(false) {} }
+            .setOnCancelListener { cont.resume(false) {} }
+            .show()
+    }
+}
 
 
+suspend fun reducirCupo(parcheId: String): Boolean {
+    return try {
+        val parche = supabase.from("parches")
+            .select {
+                filter { eq("id", parcheId) }
+            }
+            .decodeSingle<ParcheRequest>()
+        val nuevoCupo = (parche.cupo_maximo - 1).coerceAtLeast(0)
+        supabase.from("parches").update(mapOf("cupo_maximo" to nuevoCupo)) {
+            filter { eq("id", parcheId) }
+        }
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+suspend fun aumentarCupo(parcheId: String): Boolean {
+    return try {
+        val parche = supabase.from("parches")
+            .select {
+                filter { eq("id", parcheId) }
+            }
+            .decodeSingle<ParcheRequest>()
+        val nuevoCupo = parche.cupo_maximo + 1
+        supabase.from("parches").update(mapOf("cupo_maximo" to nuevoCupo)) {
+            filter { eq("id", parcheId) }
+        }
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
 
 
 

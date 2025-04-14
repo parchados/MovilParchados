@@ -1,5 +1,6 @@
 package com.example.parchadosapp.ui.screens
 
+import NotificacionRequest
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,9 +23,13 @@ import coil.compose.AsyncImage
 import com.example.parchadosapp.R
 import kotlinx.coroutines.launch
 import com.example.parchadosapp.data.SessionManager.SessionManager
+import com.example.parchadosapp.data.api.aumentarCupo
+import com.example.parchadosapp.data.api.crearNotificacion
 import com.example.parchadosapp.data.api.eliminarParchePorId
 import com.example.parchadosapp.data.api.estaInscritoEnParche
+import com.example.parchadosapp.data.api.mostrarConfirmacion
 import com.example.parchadosapp.data.api.obtenerParchesConImagen
+import com.example.parchadosapp.data.api.reducirCupo
 import com.example.parchadosapp.data.api.salirDeParche
 import com.example.parchadosapp.data.api.unirseAParche
 import com.example.parchadosapp.data.models.ParcheConImagen
@@ -132,10 +137,13 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
                         Button(
                             onClick = {
                                 scope.launch {
-                                    val eliminado = eliminarParchePorId(parcheId)
-                                    if (eliminado) {
-                                        Toast.makeText(context, "Parche eliminado", Toast.LENGTH_SHORT).show()
-                                        navController.popBackStack()
+                                    val confirm = mostrarConfirmacion(context, "¿Estás seguro de eliminar este parche?")
+                                    if (confirm) {
+                                        val eliminado = eliminarParchePorId(parcheId)
+                                        if (eliminado) {
+                                            Toast.makeText(context, "Parche eliminado", Toast.LENGTH_SHORT).show()
+                                            navController.popBackStack()
+                                        }
                                     }
                                 }
                             },
@@ -149,10 +157,24 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
                             Button(
                                 onClick = {
                                     scope.launch {
-                                        val salio = salirDeParche(userId!!, parcheId)
-                                        if (salio) {
-                                            estaInscrito = false
-                                            Toast.makeText(context, "Has salido del parche", Toast.LENGTH_SHORT).show()
+                                        val confirm = mostrarConfirmacion(context, "¿Deseas salirte del parche?")
+                                        if (confirm) {
+                                            val salio = salirDeParche(userId!!, parcheId)
+                                            if (salio) {
+                                                aumentarCupo(parcheId)
+                                                estaInscrito = false
+                                                Toast.makeText(context, "Has salido del parche", Toast.LENGTH_SHORT).show()
+                                                crearNotificacion(
+                                                    NotificacionRequest(
+                                                        tipo = "parche",
+                                                        titulo = "Saliste de un parche",
+                                                        descripcion = "🚪 Has salido del parche ${parche.nombre}",
+                                                        destinatario_id = userId!!,
+                                                        referencia_tipo = "parche"
+                                                    )
+                                                )
+                                                mostrarNotificacionLocal(context)
+                                            }
                                         }
                                     }
                                 },
@@ -167,8 +189,19 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
                                     scope.launch {
                                         val unido = unirseAParche(userId!!, parcheId)
                                         if (unido) {
+                                            reducirCupo(parcheId)
                                             estaInscrito = true
                                             Toast.makeText(context, "Te has unido al parche", Toast.LENGTH_SHORT).show()
+                                            crearNotificacion(
+                                                NotificacionRequest(
+                                                    tipo = "parche",
+                                                    titulo = "¡Te uniste a un parche!",
+                                                    descripcion = "🎉 Ahora haces parte del parche ${parche.nombre}",
+                                                    destinatario_id = userId!!,
+                                                    referencia_tipo = "parche"
+                                                )
+                                            )
+                                            mostrarNotificacionLocal(context)
                                         }
                                     }
                                 },
