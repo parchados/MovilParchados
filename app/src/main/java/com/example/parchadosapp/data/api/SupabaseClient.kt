@@ -216,6 +216,59 @@ suspend fun eliminarParchePorId(parcheId: String): Boolean {
     }
 }
 
+suspend fun estaInscritoEnParche(usuarioId: String, parcheId: String): Boolean {
+    return try {
+        val resultado = supabase.from("personas_parches")
+            .select {
+                filter {
+                    eq("persona_id", usuarioId)
+                    eq("parche_id", parcheId)
+                }
+            }
+            .decodeList<Any>()
+        resultado.isNotEmpty()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+
+suspend fun unirseAParche(usuarioId: String, parcheId: String): Boolean {
+    return try {
+        supabase.from("personas_parches")
+            .insert(
+                mapOf(
+                    "persona_id" to usuarioId,
+                    "parche_id" to parcheId
+                )
+            )
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+
+suspend fun salirDeParche(usuarioId: String, parcheId: String): Boolean {
+    return try {
+        supabase.from("personas_parches")
+            .delete {
+                filter {
+                    eq("persona_id", usuarioId)
+                    eq("parche_id", parcheId)
+                }
+            }
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+
+
 
 
 

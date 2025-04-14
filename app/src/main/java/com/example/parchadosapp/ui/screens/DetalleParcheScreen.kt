@@ -23,20 +23,23 @@ import com.example.parchadosapp.R
 import kotlinx.coroutines.launch
 import com.example.parchadosapp.data.SessionManager.SessionManager
 import com.example.parchadosapp.data.api.eliminarParchePorId
+import com.example.parchadosapp.data.api.estaInscritoEnParche
 import com.example.parchadosapp.data.api.obtenerParchesConImagen
-import com.example.parchadosapp.data.api.obtenerParchesPorUsuarioConImagen
+import com.example.parchadosapp.data.api.salirDeParche
+import com.example.parchadosapp.data.api.unirseAParche
 import com.example.parchadosapp.data.models.ParcheConImagen
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetalleParcheScreen(navController: NavController, parcheId: String) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     var parcheConImagen by remember { mutableStateOf<ParcheConImagen?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var userId by remember { mutableStateOf<String?>(null) }
+    var estaInscrito by remember { mutableStateOf<Boolean?>(null) }
 
     LaunchedEffect(Unit) {
         userId = SessionManager.getUserId(context)
@@ -44,6 +47,10 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
         try {
             val todos = obtenerParchesConImagen()
             parcheConImagen = todos.firstOrNull { it.parche.id == parcheId }
+
+            if (userId != null) {
+                estaInscrito = estaInscritoEnParche(userId!!, parcheId)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -124,7 +131,13 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
                     if (userId == parche.creador_id) {
                         Button(
                             onClick = {
-                                // Acción de eliminar si es necesario
+                                scope.launch {
+                                    val eliminado = eliminarParchePorId(parcheId)
+                                    if (eliminado) {
+                                        Toast.makeText(context, "Parche eliminado", Toast.LENGTH_SHORT).show()
+                                        navController.popBackStack()
+                                    }
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                             modifier = Modifier.fillMaxWidth()
@@ -132,14 +145,38 @@ fun DetalleParcheScreen(navController: NavController, parcheId: String) {
                             Text("Eliminar Parche", color = Color.White)
                         }
                     } else {
-                        Button(
-                            onClick = {
-                                // Acción de unirse al parche
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2F4B7C)),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Unirme al Parche", color = Color.White)
+                        if (estaInscrito == true) {
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        val salio = salirDeParche(userId!!, parcheId)
+                                        if (salio) {
+                                            estaInscrito = false
+                                            Toast.makeText(context, "Has salido del parche", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Salir del Parche", color = Color.White)
+                            }
+                        } else {
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        val unido = unirseAParche(userId!!, parcheId)
+                                        if (unido) {
+                                            estaInscrito = true
+                                            Toast.makeText(context, "Te has unido al parche", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2F4B7C)),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Unirme al Parche", color = Color.White)
+                            }
                         }
                     }
                 }
