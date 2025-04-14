@@ -1,16 +1,9 @@
 package com.example.parchadosapp.ui.screens
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.os.Build
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
+
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -25,28 +18,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.material3.Snackbar
-import androidx.core.app.ActivityCompat
 import com.example.parchadosapp.R
 import com.example.parchadosapp.data.SessionManager.SessionManager
+import com.example.parchadosapp.data.api.eliminarNotificacionesPorUsuario
+import com.example.parchadosapp.data.api.marcarNotificacionComoLeida
 import com.example.parchadosapp.data.api.obtenerNotificacionesPorUsuario
 import com.example.parchadosapp.data.models.Notificacion
 import com.example.parchadosapp.ui.theme.SecondaryColor
 import kotlinx.coroutines.launch
 
-// Función para verificar si el permiso de notificación está concedido
-fun checkNotificationPermission(context: Context): Boolean {
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        // Verificar si el permiso fue concedido en Android 13 o superior
-        ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-    } else {
-        // Para versiones anteriores, no es necesario pedir el permiso
-        true
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,44 +104,66 @@ fun NotificationsScreen(navController: NavController) {
                 Text(text = "Eliminar Notificaciones")
             }
 
-            // Lista de notificaciones reales
+            // Lista de notificaciones
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                notificationsList.forEach { noti ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(4.dp)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = noti.titulo,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF003F5C)
-                            )
-                            Text(
-                                text = noti.descripcion,
-                                fontSize = 14.sp,
-                                color = Color.Gray
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "📅 ${noti.fecha_creacion.substring(0, 10)}",
-                                fontSize = 12.sp,
-                                color = Color(0xFF003F5C)
+                notificationsList.forEachIndexed { index, noti ->
+                    Box {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 6.dp)
+                                .clickable(enabled = !noti.leida) {
+                                    coroutineScope.launch {
+                                        val success = marcarNotificacionComoLeida(noti.id)
+                                        if (success) {
+                                            notificationsList[index] = noti.copy(leida = true)
+                                            snackbarHostState.showSnackbar("Notificación marcada como leída")
+                                        }
+                                    }
+                                },
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = noti.titulo,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF003F5C)
+                                )
+                                Text(
+                                    text = noti.descripcion,
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "📅 ${noti.fecha_creacion.substring(0, 10)}",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF003F5C)
+                                )
+                            }
+                        }
+
+                        // 🔴 Circulito rojo para no leídas
+                        if (!noti.leida) {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .background(Color.Red, CircleShape)
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = (-8).dp, y = (-4).dp)
                             )
                         }
                     }
                 }
             }
 
-            // Diálogo para confirmar borrado
+            // Diálogo para eliminar todo
             if (showDeleteDialog) {
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false },
@@ -168,8 +171,17 @@ fun NotificationsScreen(navController: NavController) {
                     text = { Text("¿Estás seguro de que quieres eliminar todas las notificaciones?") },
                     confirmButton = {
                         TextButton(onClick = {
-                            notificationsList.clear()
-                            showDeleteDialog = false
+                            coroutineScope.launch {
+                                val userId = SessionManager.getUserId(context)
+                                val success = userId?.let { eliminarNotificacionesPorUsuario(it) } ?: false
+                                if (success) {
+                                    notificationsList.clear()
+                                    Toast.makeText(context, "Notificaciones eliminadas", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "Error eliminando notificaciones", Toast.LENGTH_SHORT).show()
+                                }
+                                showDeleteDialog = false
+                            }
                         }) {
                             Text("Sí")
                         }
@@ -184,4 +196,5 @@ fun NotificationsScreen(navController: NavController) {
         }
     }
 }
+
 

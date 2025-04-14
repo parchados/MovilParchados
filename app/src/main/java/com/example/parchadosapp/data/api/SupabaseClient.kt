@@ -116,6 +116,41 @@ suspend fun obtenerNotificacionesPorUsuario(usuarioId: String): List<Notificacio
         .decodeList()
 }
 
+suspend fun marcarNotificacionComoLeida(notificacionId: String): Boolean {
+    return try {
+        supabase.from("notificaciones")
+            .update(mapOf("leida" to true)) {
+                filter {
+                    eq("id", notificacionId)
+                }
+            }
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+
+suspend fun eliminarNotificacionesPorUsuario(usuarioId: String): Boolean {
+    return try {
+        supabase.from("notificaciones")
+            .delete {
+                filter {
+                    eq("destinatario_id", usuarioId)
+                }
+            }
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+
+
+
+
 
 
 
