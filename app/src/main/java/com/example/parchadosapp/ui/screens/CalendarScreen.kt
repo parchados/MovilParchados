@@ -1,9 +1,7 @@
 package com.example.parchadosapp.ui.screens
 
-import android.os.Bundle
+
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -23,7 +21,6 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.CalendarScopes
 import com.google.api.client.util.DateTime
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -131,7 +128,7 @@ fun GoogleCalendarScreen(navController: NavController) {
         while (true) {
             val fetchedEvents = fetchEventsFromParchadosCalendar(context)
             events = fetchedEvents
-            kotlinx.coroutines.delay(10_000)
+            kotlinx.coroutines.delay(3000)
         }
     }
 }

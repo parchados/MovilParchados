@@ -59,7 +59,23 @@ import com.example.parchadosapp.data.api.crearNotificacionParaUsuario
 import java.time.LocalTime
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import com.example.parchadosapp.data.api.crearNotificacion
+import com.example.parchadosapp.utils.createParcheEventInGoogleCalendar
+import java.text.SimpleDateFormat
+import java.util.Locale
+import com.google.api.client.util.DateTime
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.services.calendar.CalendarScopes
+import com.google.api.services.calendar.Calendar
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.client.http.javanet.NetHttpTransport
+import java.util.Calendar as JavaCalendar
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,6 +95,10 @@ fun ParcheScreen(navController: NavController, context: Context) {
     var expandedSport by remember { mutableStateOf(false) }
     var expandedLugar by remember { mutableStateOf(false) }
     var expandedEspacio by remember { mutableStateOf(false) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val lifecycleScope = lifecycleOwner.lifecycleScope
+
 
     var marcadorSeleccionado by remember { mutableStateOf<String?>(null) }
 
@@ -478,12 +498,21 @@ fun ParcheScreen(navController: NavController, context: Context) {
                                             )
 
                                             crearNotificacion(notificacion)
-                                            mostrarNotificacionLocal(context) // si ya la tienes definida
+                                            mostrarNotificacionLocal(context)
+
+                                            // ✅ Agrega el evento al calendario
+                                            createParcheEventInGoogleCalendar(
+                                                context = context,
+                                                lifecycleScope = lifecycleScope, // asegúrate de pasar el scope correcto
+                                                parche = parcheRequest // este es el objeto que ya tienes construido
+                                            )
                                         }
 
                                         Toast.makeText(context, "Parche creado exitosamente", Toast.LENGTH_LONG).show()
                                         navController.popBackStack()
                                     }
+
+
 
                                     else {
                                         Toast.makeText(context, "Error al crear el parche", Toast.LENGTH_LONG).show()
@@ -580,10 +609,10 @@ fun CustomTextField(
 
 // ✅ Selector de fecha sin conflicto
 fun showParcheDatePicker(context: Context, onDateSelected: (String) -> Unit) {
-    val calendar = Calendar.getInstance()
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
+    val calendar = JavaCalendar.getInstance()
+    val year = calendar.get(JavaCalendar.YEAR)
+    val month = calendar.get(JavaCalendar.MONTH)
+    val day = calendar.get(JavaCalendar.DAY_OF_MONTH)
 
     val datePickerDialog = DatePickerDialog(
         context,
@@ -598,9 +627,10 @@ fun showParcheDatePicker(context: Context, onDateSelected: (String) -> Unit) {
 
 // ✅ Selector de hora
 fun showParcheTimePicker(context: Context, onTimeSelected: (String) -> Unit) {
-    val calendar = Calendar.getInstance()
-    val hour = calendar.get(Calendar.HOUR_OF_DAY)
-    val minute = calendar.get(Calendar.MINUTE)
+    val calendar = JavaCalendar.getInstance()
+    val hour = calendar.get(JavaCalendar.HOUR_OF_DAY)
+    val minute = calendar.get(JavaCalendar.MINUTE)
+
 
     val timePickerDialog = TimePickerDialog(
         context,
