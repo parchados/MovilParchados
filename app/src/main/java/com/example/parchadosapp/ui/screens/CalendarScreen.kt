@@ -36,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -57,24 +59,29 @@ fun GoogleCalendarScreen(navController: NavController) {
         floatingActionButton = {
             Box(
                 modifier = Modifier
-                    .size(60.dp) // ajusta el tamaño total del contenedor
+                    .size(60.dp)
                     .padding(4.dp)
             ) {
                 IconButton(
                     onClick = {
-                        createSampleEventInParchadosCalendar(context, lifecycle.lifecycleScope)
+                        val intent = Intent(Intent.ACTION_VIEW).apply {
+                            data = Uri.parse("content://com.android.calendar/time/")
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        context.startActivity(intent)
                     },
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.googlecalendar),
-                        contentDescription = "Agregar evento",
-                        tint = Color.Unspecified, // ✅ importante para que NO aplique ningún color
+                        contentDescription = "Abrir Google Calendar",
+                        tint = Color.Unspecified,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
             }
         }
+
     )
 
     { paddingValues ->
@@ -127,10 +134,14 @@ fun GoogleCalendarScreen(navController: NavController) {
     LaunchedEffect(Unit) {
         while (true) {
             val fetchedEvents = fetchEventsFromParchadosCalendar(context)
-            events = fetchedEvents
+
+            // Ordenar por fecha descendente (más reciente primero)
+            events = fetchedEvents.sortedByDescending { it.start?.dateTime?.value ?: 0L }
+
             kotlinx.coroutines.delay(3000)
         }
     }
+
 }
 
 
@@ -170,49 +181,6 @@ fun EventCard(event: com.google.api.services.calendar.model.Event) {
 @Composable
 fun DefaultPreview() {
     GoogleCalendarScreen(navController = rememberNavController()) // ✅ Pasa un NavController falso
-}
-
-
-fun createSampleEvent(context: Context) {
-    val account = GoogleSignIn.getLastSignedInAccount(context)
-    if (account != null) {
-        val credential = GoogleAccountCredential.usingOAuth2(
-            context, listOf(CalendarScopes.CALENDAR)
-        )
-        credential.selectedAccount = account.account
-
-        val service = Calendar.Builder(
-            NetHttpTransport(),
-            GsonFactory.getDefaultInstance(),
-            credential
-        ).setApplicationName("ParchadosApp").build()
-
-        // Define hora de inicio y fin del evento
-        val startDateTime = DateTime(System.currentTimeMillis() + 3600_000) // 1 hora desde ahora
-        val endDateTime = DateTime(System.currentTimeMillis() + 7200_000)   // 2 horas desde ahora
-
-        // Crear el objeto del evento
-        val event = com.google.api.services.calendar.model.Event().apply {
-            summary = "Partido con los panas ⚽"
-            location = "Parque Simón Bolívar, Bogotá"
-            description = "Nos reunimos a jugar un rato y pasarla bien."
-
-            start = com.google.api.services.calendar.model.EventDateTime().setDateTime(startDateTime)
-            end = com.google.api.services.calendar.model.EventDateTime().setDateTime(endDateTime)
-        }
-
-        // Ejecutar en un hilo separado
-        Thread {
-            try {
-                val createdEvent = service.events().insert("primary", event).execute()
-                Log.d("GoogleCalendar", "✅ Evento creado: ${createdEvent.htmlLink}")
-            } catch (e: Exception) {
-                Log.e("GoogleCalendar", "❌ Error al crear evento: ${e.message}")
-            }
-        }.start()
-    } else {
-        Log.e("GoogleCalendar", "❗ No se encontró una cuenta de Google activa")
-    }
 }
 
 
