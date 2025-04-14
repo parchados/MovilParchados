@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ParcheRequest(
+    val id: String? = null,
     val espacio_id: String,
     val creador_id: String,
     val nombre: String,

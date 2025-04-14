@@ -180,20 +180,43 @@ suspend fun crearNotificacion(notificacion: NotificacionRequest): Boolean {
 }
 
 
-suspend fun obtenerParchesPorUsuario(userId: String): List<ParcheRequest> {
+suspend fun obtenerParchesPorUsuarioConImagen(usuarioId: String): List<ParcheConImagen> {
     return try {
-        supabase.from("parches")
+        val parches = supabase.from("parches")
             .select {
                 filter {
-                    eq("creador_id", userId)
+                    eq("creador_id", usuarioId) // <- ✅ Mantiene el filtro igual a la anterior
                 }
             }
-            .decodeList()
+            .decodeList<ParcheRequest>()
+
+        parches.map { parche ->
+            val espacio = obtenerEspacioPorId(parche.espacio_id)
+            ParcheConImagen(parche, espacio?.imagen_url)
+        }
     } catch (e: Exception) {
         e.printStackTrace()
         emptyList()
     }
 }
+
+
+suspend fun eliminarParchePorId(parcheId: String): Boolean {
+    return try {
+        supabase.from("parches")
+            .delete {
+                filter {
+                    eq("id", parcheId)
+                }
+            }
+        true
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
+
 
 
 
