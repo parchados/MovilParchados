@@ -467,54 +467,53 @@ fun ParcheScreen(navController: NavController, context: Context) {
                                 return@Button
                             }
 
-                            val parcheRequest = ParcheRequest(
-                                espacio_id = espacioSeleccionadoId!!,
-                                creador_id = "aaaaaaaa-9999-0000-0000-000000000000", // fijo
-                                nombre = parcheName,
-                                descripcion = descripcionParche,
-                                fecha = date,
-                                hora_inicio = time,
-                                hora_fin = horaFin,
-                                cupo_maximo = cupo,
-                                estado = "Activo",
-                                deporte = selectedSport
-                            )
-
-                            Log.d("ParcheDebug", parcheRequest.toString()) // para revisar valores
-
                             CoroutineScope(Dispatchers.IO).launch {
+                                val userId = SessionManager.getUserId(context)
+                                if (userId == null) {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(context, "No se pudo identificar al usuario", Toast.LENGTH_LONG).show()
+                                    }
+                                    return@launch
+                                }
+
+                                val parcheRequest = ParcheRequest(
+                                    espacio_id = espacioSeleccionadoId!!,
+                                    creador_id = userId,
+                                    nombre = parcheName,
+                                    descripcion = descripcionParche,
+                                    fecha = date,
+                                    hora_inicio = time,
+                                    hora_fin = horaFin,
+                                    cupo_maximo = cupo,
+                                    estado = "Activo",
+                                    deporte = selectedSport
+                                )
+
+                                Log.d("ParcheDebug", parcheRequest.toString())
+
                                 val creado = crearParche(parcheRequest)
                                 withContext(Dispatchers.Main) {
                                     if (creado) {
-                                        val userId = SessionManager.getUserId(context)
+                                        val notificacion = NotificacionRequest(
+                                            tipo = "parche",
+                                            titulo = "¡Parche creado!",
+                                            descripcion = "🎉 Felicidades, tu parche fue creado. ¡Pásala al máximo!",
+                                            destinatario_id = userId,
+                                            referencia_tipo = "parche"
+                                        )
 
-                                        if (userId != null) {
-                                            val notificacion = NotificacionRequest(
-                                                tipo = "parche",
-                                                titulo = "¡Parche creado!",
-                                                descripcion = "🎉 Felicidades, tu parche fue creado. ¡Pásala al máximo!",
-                                                destinatario_id = userId,
-                                                referencia_tipo = "parche"
-                                            )
+                                        crearNotificacion(notificacion)
+                                        mostrarNotificacionLocal(context)
 
-                                            crearNotificacion(notificacion)
-                                            mostrarNotificacionLocal(context)
-
-                                            // ✅ Agrega el evento al calendario
-                                            createParcheEventInGoogleCalendar(
-                                                context = context,
-                                                lifecycleScope = lifecycleScope, // asegúrate de pasar el scope correcto
-                                                parche = parcheRequest // este es el objeto que ya tienes construido
-                                            )
-                                        }
+                                        createParcheEventInGoogleCalendar(
+                                            context = context,
+                                            lifecycleScope = lifecycleScope,
+                                            parche = parcheRequest
+                                        )
 
                                         Toast.makeText(context, "Parche creado exitosamente", Toast.LENGTH_LONG).show()
                                         navController.popBackStack()
-                                    }
-
-
-
-                                    else {
+                                    } else {
                                         Toast.makeText(context, "Error al crear el parche", Toast.LENGTH_LONG).show()
                                     }
                                 }
@@ -522,9 +521,7 @@ fun ParcheScreen(navController: NavController, context: Context) {
                         } else {
                             Toast.makeText(context, "Selecciona un espacio válido", Toast.LENGTH_LONG).show()
                         }
-
-                    }
-                    ,
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = AccentColor),
                     shape = RoundedCornerShape(10.dp)

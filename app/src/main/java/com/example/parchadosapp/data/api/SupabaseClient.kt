@@ -180,6 +180,23 @@ suspend fun crearNotificacion(notificacion: NotificacionRequest): Boolean {
 }
 
 
+suspend fun obtenerParchesPorUsuario(userId: String): List<ParcheRequest> {
+    return try {
+        supabase.from("parches")
+            .select {
+                filter {
+                    eq("creador_id", userId)
+                }
+            }
+            .decodeList()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        emptyList()
+    }
+}
+
+
+
 
 
 

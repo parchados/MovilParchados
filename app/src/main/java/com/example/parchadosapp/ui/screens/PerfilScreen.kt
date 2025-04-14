@@ -70,7 +70,6 @@ fun PerfilScreen(navController: NavController) {
         }
     }
 
-    // Cargar datos del usuario logueado
     LaunchedEffect(Unit) {
         val userId = SessionManager.getUserId(context)
         userId?.let {
@@ -82,7 +81,6 @@ fun PerfilScreen(navController: NavController) {
         }
     }
 
-    // UI...
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -157,7 +155,6 @@ fun PerfilScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Galería y cámara
             Row(
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -205,6 +202,21 @@ fun PerfilScreen(navController: NavController) {
                 Text("Cambiar nombre", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp))
             }
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = {
+                    navController.navigate("gestion")
+                },
+                modifier = Modifier.height(50.dp).clip(RoundedCornerShape(10.dp)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFEAC67A),
+                    contentColor = Color(0xFF003F5C)
+                )
+            ) {
+                Text("Mis Parches", style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp))
+            }
+
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
@@ -226,7 +238,6 @@ fun PerfilScreen(navController: NavController) {
             }
         }
 
-        // 🔧 Diálogo de salida con coroutine
         if (showExitDialog) {
             AlertDialog(
                 onDismissRequest = { showExitDialog = false },

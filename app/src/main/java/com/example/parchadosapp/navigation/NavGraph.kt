@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.parchadosapp.data.PatchRepository
 import com.example.parchadosapp.ui.screens.BuscarScreen
+import com.example.parchadosapp.ui.screens.GestionScreen
 import com.example.parchadosapp.ui.screens.GoogleCalendarScreen
 import com.example.parchadosapp.ui.screens.HomeScreen
 import com.example.parchadosapp.ui.screens.LoginScreen
@@ -55,5 +56,11 @@ fun NavGraph(navController: NavHostController, context: Context) {
         composable("buscar") {
             BuscarScreen(navController = navController, context = context)
         }
+
+        composable("gestion") {
+            GestionScreen(navController)
+        }
+
+
     }
 }
