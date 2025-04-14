@@ -281,8 +281,11 @@ suspend fun fetchEventsFromParchadosCalendar(context: Context): List<com.google.
 
         return try {
             val calendarId = getOrCreateParchadosCalendarId(service)
+
             if (calendarId != null) {
-                val events = withContext(Dispatchers.IO) {
+                Log.d("GoogleCalendar", "✅ ID del calendario obtenido: $calendarId")
+
+                val eventsResponse = withContext(Dispatchers.IO) {
                     service.events().list(calendarId)
                         .setMaxResults(20)
                         .setTimeMin(DateTime(System.currentTimeMillis()))
@@ -290,15 +293,21 @@ suspend fun fetchEventsFromParchadosCalendar(context: Context): List<com.google.
                         .setSingleEvents(true)
                         .execute()
                 }
-                events.items
+
+                Log.d("GoogleCalendar", "📆 Eventos obtenidos: ${eventsResponse.items.size}")
+                eventsResponse.items
             } else {
+                Log.e("GoogleCalendar", "❌ No se pudo obtener el calendarId")
                 emptyList()
             }
+
         } catch (e: Exception) {
-            Log.e("GoogleCalendar", "❌ Error al cargar eventos: ${e.message}")
+            Log.e("GoogleCalendar", "❌ Error al cargar eventos: ${e.message}", e)
             emptyList()
         }
     }
+
+    Log.e("GoogleCalendar", "❌ No hay cuenta activa de Google")
     return emptyList()
 }
 

@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.parchadosapp.data.PatchRepository
 import com.example.parchadosapp.ui.screens.BuscarScreen
+import com.example.parchadosapp.ui.screens.DetalleParcheScreen
 import com.example.parchadosapp.ui.screens.GestionScreen
 import com.example.parchadosapp.ui.screens.GoogleCalendarScreen
 import com.example.parchadosapp.ui.screens.HomeScreen
@@ -60,6 +61,13 @@ fun NavGraph(navController: NavHostController, context: Context) {
         composable("gestion") {
             GestionScreen(navController)
         }
+
+
+        composable("detalle_parche/{parcheId}") { backStackEntry ->
+            val parcheId = backStackEntry.arguments?.getString("parcheId") ?: ""
+            DetalleParcheScreen(navController, parcheId)
+        }
+
 
 
     }

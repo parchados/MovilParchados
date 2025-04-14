@@ -98,8 +98,9 @@ fun BuscarScreen(navController: NavController, context: Context) {
             ) {
                 itemsIndexed(filteredPatches) { _, parcheConImagen ->
                     PatchCardFromSupabase(parcheConImagen = parcheConImagen) {
-                        // Acciones al hacer clic
+                        navController.navigate("detalle_parche/${parcheConImagen.parche.id}")
                     }
+
                 }
             }
 

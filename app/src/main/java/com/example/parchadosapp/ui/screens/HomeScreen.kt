@@ -153,7 +153,9 @@ fun HomeScreen(navController: NavController, context: Context) {
 
                 itemsIndexed(patches) { _, parcheConImagen ->
                     PatchCardFromSupabase(parcheConImagen = parcheConImagen) {
-                        // Aquí puedes usar parcheConImagen.parche.id si necesitas navegar
+                        parcheConImagen.parche.id?.let { id ->
+                            navController.navigate("detalle_parche/$id")
+                        }
                     }
                 }
             }
