@@ -24,10 +24,10 @@ val supabase: SupabaseClient = createSupabaseClient(
 ) {
     install(Postgrest)
 
-    // ✅ Agregamos el serializador personalizado
+
     defaultSerializer = KotlinXSerializer(
         Json {
-            ignoreUnknownKeys = true // <--- Esta línea es clave
+            ignoreUnknownKeys = true
         }
     )
 }
